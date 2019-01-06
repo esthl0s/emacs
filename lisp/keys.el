@@ -28,6 +28,8 @@
              ("M-c" . kill-ring-save)
              ("M-v" . yank))
     (ace-window ("M-w" . ace-window))
+    (cider-repl ("M-<return>" . cider-repl-return))
+    (hydra ("C-c h" . hydra-hydra/body))
     (org ("C-c <" . org-promote-subtree)
          ("C-c >" . org-demote-subtree)
          ("C-c ," . org-set-priority)

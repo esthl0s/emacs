@@ -130,6 +130,10 @@
      (add-hook 'c-mode-hook
                (lambda ()
                  (setq indent-tabs-mode t))))
+    ((cider-repl)
+     (add-hook 'cider-repl-mode-hook
+               (lambda ()
+                 (keys-extend-local-keymap '(cider-repl)))))
     ((elisp-mode)
      (add-hook 'emacs-lisp-mode-hook
                (lambda ()
@@ -138,6 +142,8 @@
                  (show-paren-mode 1)
                  (setq indent-tabs-mode nil))))
     ((fill-column-indicator)
+     (setq fci-rule-use-dashes t)
+     (setq fci-rule-color "blue")
      (dolist (my-hook programming-modes-list)
        (add-hook my-hook
                  (lambda ()
@@ -154,6 +160,67 @@
      (add-hook 'geiser-mode-hook #'undo-tree-mode))
     ((hexl)
      (add-to-list 'auto-mode-alist '("\\.bin\\'" . hexl-mode)))
+    ((hideshow)
+     (dolist (mode-hook programming-modes-list)
+       (add-hook mode-hook
+                 (lambda ()
+                   (hs-minor-mode 1)))))
+    ((hideshow diminish)
+     (diminish 'hs-minor-mode))
+    ((hydra hideshow)
+     (defhydra hydra-hideshow (:foreign-keys run)
+       "
+^Global^           ^Local^
+^^^^^^^----------------------------
+_H_ hs-hide-all   _h_ hs-hide-block
+_S_ hs-show-all   _s_ hs-show-block
+                  _l_ hs-hide-level
+"
+       ("H" hs-hide-all)
+       ("S" hs-show-all)
+       ("h" hs-hide-block)
+       ("s" hs-show-block)
+       ("l" hs-hide-level)
+       ("q" nil "quit" :exit t)))
+    ((hydra paredit)
+     (defhydra hydra-paredit (:foreign-keys run)
+       "
+^Navigate^                       |  ^Mutate^                 | ^Interact^
+^^^^^^-------------------------------|-------------------------|------------
+         C-M-u      C-M-o      |          C-M-i          |   << M-/ >>
+             \\     /           | C-,  <<    ^     >> C-.  |
+     C-M-j <----O----> C-m-l   |         ---O---         |   O       O
+             /     \\           | M-.  >>    V    << M-,  |
+          M-u       M-o        |          C-M-k          |   >> C-/ <<
+"
+       ("C-M-i" paredit-raise-sexp)
+       ("C-M-j" paredit-backward)
+       ("C-M-k" paredit-wrap-sexp)
+       ("C-M-l" paredit-forward)
+       ("M-u" paredit-backward-down)
+       ("C-M-u" paredit-backward-up)
+       ("M-o" paredit-forward-down)
+       ("C-M-o" paredit-forward-up)
+       ("C-." paredit-forward-slurp-sexp)
+       ("C-," paredit-backward-slurp-sexp)
+       ("M-," paredit-forward-barf-sexp)
+       ("M-." paredit-backward-barf-sexp)
+       ("C-M-;" paredit-comment-dwim)
+       ("M-/" paredit-split-sexp)
+       ("C-/" paredit-splice-sexp)
+       ("q" nil "quit" :exit q)))
+    ((hydra)
+     (defhydra hydra-hydra ()
+       "
+_h_ hideshow
+_p_ paredit
+"
+       ("h" hydra-hideshow/body :exit t)
+       ("p" hydra-paredit/body :exit t))
+     (dolist (mode-hook programming-modes-list)
+       (add-hook mode-hook
+                 (lambda ()
+                   (keys-extend-local-keymap '(hydra))))))
     ((keys)
      (dolist (my-hook programming-modes-list)
        (add-hook my-hook
@@ -272,7 +339,7 @@
        (interactive)
        (require 'tramp)
        (let* ( ;; use a separate history list for "root" files.
-              (file-name-history find-file-root-history)
+              (file-name-history find-f (ile-root-history))
               (name (or buffer-file-name default-directory))
               (tramp (and (tramp-tramp-file-p name)
                           (tramp-dissect-file-name name)))
@@ -336,7 +403,7 @@
     ("53f65fd5042438d3f0d484dda7cae17e1105ec87de1ac52fee6941247f49098a" "34b9a79a465da3e91300b99ba3b2e533cbfc777ae39887be3c5e93469d183614" "655b7e2225ced08b3a31f086a5357eca10f2bedd40c481e532e570f4d3db62bb" "90e339f5fbc3f739c6bdb82f3553c0fe8377b5b44586414d6ec64951af1fd99b" "ae8da78bab18b45212184256d397ab713383374cc717b6f8229da235f9a55ce9" "2b16f250227e1bb0e98d14dd2327ca4fdbf3b54752b898033d4499f96121e4cb" "5f9bccf201fd171f630ba426d9870069534363bd92e327419bf269dd0345a0e6" "b25d2fffca5d821cff86895eb03d8e72af37419ec612474692db26aff34e2abf" "de8448a27a8f9cf378e31f3023d329cda6743ee2cb9c68a8db87f5d728c72ee1" "d2636cff590df97c4cb5bb6ad7f1f3f72ac841acedb6e5259a29573862637364" default)))
  '(package-selected-packages
    (quote
-    (cider ace-window geiser fill-column-indicator dictionary with-editor page-break-lines paredit rainbow-delimiters smart-tabs-mode undo-tree diminish slime alert sly helm-descbinds helm-describe-modes aggressive-indent ecb haskell-mode flycheck-pyflakes py-autopep8)))
+    (hydra sr-speedbar cider ace-window geiser fill-column-indicator dictionary with-editor page-break-lines paredit rainbow-delimiters smart-tabs-mode undo-tree diminish slime alert sly helm-descbinds helm-describe-modes aggressive-indent ecb haskell-mode flycheck-pyflakes py-autopep8)))
  '(send-mail-function (quote sendmail-send-it))
  '(znc-servers
    (quote

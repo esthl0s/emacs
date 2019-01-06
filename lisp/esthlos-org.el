@@ -53,7 +53,7 @@
 
 ;; set the keywords and their colors
 (setq org-todo-keywords
-      '((sequence "|" "RESPONSIBILITY(r)")
+      '((sequence "|" "GOAL(g)")
         (sequence "ACTION(n)" "INPROGRESS(i)"
                   "|" "DONE(d!)" "DELEGATED(l@)")
         (sequence "WAITING(w)" "|" "DONE(d!)" "DELEGATED(l@)")
@@ -62,7 +62,7 @@
         (sequence "EVENT(e)" "|" "DONE(d!)")
         (sequence "|" "ABANDONED(a@)")))
 (setq org-todo-keyword-faces
-      (quote (("RESPONSIBILITY" :foreground "black" :background "yellow")
+      (quote (("GOAL" :foreground "black" :background "green")
               ("PROJECT" :foreground "red")
               ("ACTION" :foreground "cyan")
               ("INPROGRESS" :foreground "magenta")
@@ -215,11 +215,6 @@ in the current buffer. Relies on `org-archive-headline-tags-to-archive'"
 (defun org-headline-is-project ()
   (equal "PROJECT" (org-headline-get-property "TODO")))
 
-(defun org-headline-has-responsibility ()
-  (if (equal nil (org-headline-get-property "responsibility"))
-      nil
-    (point)))
-
 (defun org-headline-has-goal ()
   (if (equal nil (org-headline-get-property "goal"))
       nil
@@ -285,10 +280,7 @@ in the current buffer. Relies on `org-archive-headline-tags-to-archive'"
         ("J" "troublesome projects"
          ((tags "+TODO=\"PROJECT\"-hold"
                 ((org-agenda-overriding-header "Projects without goals")
-                 (org-agenda-skip-function 'org-headline-has-goal)))
-          (tags "+TODO=\"PROJECT\"-hold"
-                ((org-agenda-overriding-header "Projects without responsibilities")
-                 (org-agenda-skip-function 'org-headline-has-responsibility)))))
+                 (org-agenda-skip-function 'org-headline-has-goal)))))
         ("S" "stasis"
          ((tags "+hold"
                 ((org-agenda-overriding-header "Items on hold")))
@@ -307,7 +299,17 @@ in the current buffer. Relies on `org-archive-headline-tags-to-archive'"
          ((tags "STYLE=\"habit\"")))))
 
 
-;; Custom definition of stuck projects
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; entry manipulation
+
+(defun org-ask-and-set-property (property prompt)
+  (org-entry-put (point) property (read-string prompt)))
+
+(defun org-project-set-goal ()
+  (interactive)
+  (org-ask-and-set-property
+   "goal"
+   "Enter the goals this projects meets, space-separated: "))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
