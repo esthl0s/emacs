@@ -295,20 +295,13 @@ _p_ paredit
      (add-hook 'slime-repl-mode-hook
                'override-slime-repl-bindings-with-paredit)
      (require 'slime-autoloads)
-     (add-hook 'lisp-mode-hook
-               (lambda ()
-                 (slime-mode t)))
      (add-hook 'inferior-lisp-mode-hook
                (lambda ()
                  (inferior-slime-mode t))))
     ((slime keys)
-     (add-hook 'slime-hode-hook
+     (add-hook 'lisp-mode-hook
                (lambda ()
-                 (keys-extend-keymap slime-mode-map '(general slime)))))
-    ((slime paredit)
-     (add-hook 'slime-hode-hook
-               (lambda ()
-                 (keys-extend-keymap slime-mode-map '(paredit)))))
+                 (keys-extend-local-keymap '(general slime)))))
     ((smart-tabs-mode)
      (setq smart-tabs-mode t)
      (smart-tabs-add-language-support tex plain-tex-mode-hook
