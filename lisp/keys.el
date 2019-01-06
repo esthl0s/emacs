@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-
+(require 'cl)
 
 (make-local-variable 'keys-buffer-binding-sets)
 (setq-default keys-buffer-binding-sets '())
