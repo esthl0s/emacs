@@ -8,7 +8,7 @@
 (defun eval-body (body-forms)
   (condition-case nil
       (progn (mapcar 'eval body-forms)
-             'ok)
+             'ok ())
     (error 'body)))
 
 (defun try-load-init-sexpr (s)
@@ -64,8 +64,6 @@
      (setq browse-url-browser-function 'browse-url-firefox)
      (add-hook 'text-mode-hook
                (lambda ()
-                 (if (featurep 'page-break-lines)
-                     (page-break-lines-mode))
                  (setq fill-column 80)
                  (hl-line-mode 1)
                  (auto-fill-mode 1)))
@@ -83,13 +81,17 @@
        `(dolist (binding-pair ,bindings)
           (global-set-key (kbd (car binding-pair))
                           (cadr binding-pair))))
-     (defvar lisp-modes '(common-lisp-mode-hook
-                          clojure-mode-hook
-                          cider-repl-mode-hook
-                          emacs-lisp-mode-hook
-                          lisp-mode-hook
-                          scheme-mode-hook))
-     (defvar programming-modes-list (append lisp-modes
+     ;; easy add to hook set
+     (defun do-for-hooks-in-list (hook-list function)
+       (dolist (hook hook-list)
+         (add-hook hook function)))
+     (defvar lisp-mode-hooks '(common-lisp-mode-hook
+                               clojure-mode-hook
+                               cider-repl-mode-hook
+                               emacs-lisp-mode-hook
+                               lisp-mode-hook
+                               scheme-mode-hook))
+     (defvar programming-modes-list (append lisp-mode-hooks
                                             '(ada-mode
                                               html-mode-hook
                                               tex-mode-hook
@@ -111,16 +113,12 @@
      (mapcar (lambda (x) (add-to-list 'auto-mode-alist (cons x 'ada-mode)))
              (list "\\.gpr\\'" "\\.ads\\'" "\\.adb\\'")))
     ((aggressive-indent)
-     (dolist (my-hook '(common-lisp-mode-hook
-                        emacs-lisp-mode-hook
-                        lisp-mode-hook
-                        tex-mode-hook
-                        scheme-mode-hook
-                        shell-script-mode-hook
-                        c-mode-hook))
-       (add-hook my-hook #'aggressive-indent-mode)))
+     (do-for-hooks-in-list lisp-mode-hooks
+                           (lambda () (aggressive-indent-mode 1))))
+    ((aggressive-indent diminish)
+     (diminish 'aggressive-indent-mode))
     ((ascii))
-    ((autorevert)
+    ((autorevert diminish)
      (diminish 'auto-revert-mode))
     ((calendar)
      (setq calendar-latitude 41.2)
@@ -134,6 +132,7 @@
      (add-hook 'cider-repl-mode-hook
                (lambda ()
                  (keys-extend-local-keymap '(cider-repl)))))
+
     ((elisp-mode)
      (add-hook 'emacs-lisp-mode-hook
                (lambda ()
@@ -141,14 +140,14 @@
                  (setq indent-tabs-mode nil)
                  (show-paren-mode 1)
                  (setq indent-tabs-mode nil))))
+    ((eldoc diminish)
+     (diminish 'eldoc-mode))
     ((fill-column-indicator)
      (setq fci-rule-use-dashes t)
      (setq fci-rule-color "blue")
-     (dolist (my-hook programming-modes-list)
-       (add-hook my-hook
-                 (lambda ()
-                   (setq fill-column 80)
-                   (fci-mode)))))
+     (do-for-hooks-in-list programming-modes-list
+                           (lambda () (fci-mode))))
+
     ((font-core)
      (load-file "~/.emacs.d/config.local/font.el")
      (add-to-list 'default-frame-alist
@@ -161,13 +160,13 @@
     ((hexl)
      (add-to-list 'auto-mode-alist '("\\.bin\\'" . hexl-mode)))
     ((hideshow)
-     (dolist (mode-hook programming-modes-list)
-       (add-hook mode-hook
-                 (lambda ()
-                   (hs-minor-mode 1)))))
+     (do-for-hooks-in-list programming-modes-list
+                           (lambda () (hs-minor-mode 1)))
+     (do-for-hooks-in-list lisp-mode-hooks
+                           (lambda () (keys-extend-local-keymap '(hideshow-lisp)))))
     ((hideshow diminish)
      (diminish 'hs-minor-mode))
-    ((hydra hideshow)
+    ((hideshow hydra)
      (defhydra hydra-hideshow (:foreign-keys run)
        "
 ^Global^           ^Local^
@@ -182,7 +181,58 @@ _S_ hs-show-all   _s_ hs-show-block
        ("s" hs-show-block)
        ("l" hs-hide-level)
        ("q" nil "quit" :exit t)))
-    ((hydra paredit)
+    ((hydra)
+     (defhydra hydra-hydra ()
+       "
+_h_ hideshow
+_m_ markdown
+_p_ paredit
+"
+       ("h" hydra-hideshow/body :exit t)
+       ("m" hydra-markdown-mode/body :exit t)
+       ("p" hydra-paredit/body :exit t))
+     (do-for-hooks-in-list programming-modes-list
+                           (lambda ()
+                             (keys-extend-local-keymap '(hydra)))))
+    ((keys)
+     (do-for-hooks-in-list programming-modes-list
+                           (lambda ()
+                             (keys-extend-local-keymap '(general)))))
+    ((lisp-mode)
+     (add-hook 'lisp-mode-hook
+               (lambda ()
+                 (font-lock-mode 1)
+                 (setq indent-tabs-mode nil)
+                 (show-paren-mode 1)
+                 (setq indent-tabs-mode nil))))
+    ((markdown-mode))
+    ((markdown-mode hydra)
+     (defhydra hydra-markdown-mode (:foreign-keys run)
+       "
+_B_ markdown-blockquote-region
+"
+       ("B" markdown-blockquote-region)
+       ("q" nil "quit" :exit t)))
+    ((org)
+     (require 'esthlos-org))
+    ((org keys)
+     (do-for-hooks-in-list '(org-mode-hook
+                             org-agenda-mode-hook)
+                           (lambda ()
+                             (keys-extend-local-keymap '(general org)))))
+    ((page-break-lines))
+    ((page-break-lines diminish)
+     (diminish page-break-lines-mode))
+    ((paredit)
+     (do-for-hooks-in-list lisp-mode-hooks
+                           (lambda () (paredit-mode 1))))
+
+    ((paredit diminish)
+     (diminish 'paredit-mode))
+    ((paredit keys)
+     (add-hook 'paredit-mode-hook
+               (lambda () (keys-extend-local-keymap '(paredit)))))
+    ((paredit hydra)
      (defhydra hydra-paredit (:foreign-keys run)
        "
 ^Navigate^                       |  ^Mutate^                 | ^Interact^
@@ -209,64 +259,19 @@ _S_ hs-show-all   _s_ hs-show-block
        ("M-/" paredit-split-sexp)
        ("C-/" paredit-splice-sexp)
        ("q" nil "quit" :exit q)))
-    ((hydra)
-     (defhydra hydra-hydra ()
-       "
-_h_ hideshow
-_p_ paredit
-"
-       ("h" hydra-hideshow/body :exit t)
-       ("p" hydra-paredit/body :exit t))
-     (dolist (mode-hook programming-modes-list)
-       (add-hook mode-hook
-                 (lambda ()
-                   (keys-extend-local-keymap '(hydra))))))
-    ((keys)
-     (dolist (my-hook programming-modes-list)
-       (add-hook my-hook
-                 (lambda ()
-                   (keys-extend-local-keymap '(general))))))
-    ((lisp-mode)
-     (add-hook 'lisp-mode-hook
-               (lambda ()
-                 (font-lock-mode 1)
-                 (setq indent-tabs-mode nil)
-                 (show-paren-mode 1)
-                 (setq indent-tabs-mode nil))))
-    ((org)
-     (require 'esthlos-org))
-    ((org keys)
-     (dolist (my-hook '(org-mode-hook
-                        org-agenda-mode-hook))
-       (add-hook my-hook
-                 (lambda ()
-                   (keys-extend-local-keymap '(general org))))))
-    ((page-break-lines))
-    ((page-break-lines diminish)
-     (diminish page-break-lines-mode))
-    ((paredit)
-     (dolist (my-hook '(common-lisp-mode-hook
-                        clojure-mode-hook
-                        cider-repl-mode-hook
-                        emacs-lisp-mode-hook
-                        lisp-mode-hook
-                        slime-repl-mode-hook
-                        scheme-mode-hook))
-       (add-hook my-hook #'paredit-mode)))
-    ((paredit keys)
-     (add-hook 'paredit-mode-hook
-               (lambda () (keys-extend-local-keymap '(paredit)))))
     ((paren)
      (setq show-paren-delay 0)
      (setq show-paren-style 'expression)
      (setq show-paren-when-point-in-periphery t)
      (setq show-paren-when-point-inside-paren t))
     ((rainbow-delimiters)
-     (dolist (my-hook programming-modes-list)
-       (add-hook my-hook #'rainbow-delimiters-mode)))
+     (do-for-hooks-in-list programming-modes-list
+                           (lambda () (rainbow-delimiters-mode 1))))
     ((sexpr)
-     (dolist (my-hook lisp-modes)
-       (add-hook my-hook #'sexpr-mode)))
+     (do-for-hooks-in-list lisp-mode-hooks
+                           (lambda () (sexpr-mode 1))))
+    ((sexpr diminish)
+     (diminish 'sexpr-mode))
     ((sexpr keys)
      (add-hook 'sexpr-mode-hook
                (lambda () (keys-extend-local-keymap '(sexpr)))))
@@ -356,8 +361,8 @@ _p_ paredit
            (run-hooks 'find-file-root-hook))))
      (global-set-key [(control x) (control r)] 'find-file-root))
     ((undo-tree)
-     (dolist (my-hook programming-modes-list)
-       (add-hook my-hook #'undo-tree-mode)))
+     (do-for-hooks-in-list programming-modes-list
+                           (lambda () (undo-tree-mode 1))))
     ((undo-tree keys)
      (add-hook 'undo-tree-mode-hook
                (lambda ()
@@ -371,8 +376,8 @@ _p_ paredit
      (setq whitespace-action
            (quote
             (cleanup auto-cleanup report-on-bogus)))
-     (dolist (my-hook programming-modes-list)
-       (add-hook my-hook #'whitespace-mode)))
+     (do-for-hooks-in-list programming-modes-list
+                           (lambda () (whitespace-mode 1))))
     ((whitespace diminish)
      (diminish 'whitespace-mode))
     ((with-editor))
@@ -403,7 +408,7 @@ _p_ paredit
     ("53f65fd5042438d3f0d484dda7cae17e1105ec87de1ac52fee6941247f49098a" "34b9a79a465da3e91300b99ba3b2e533cbfc777ae39887be3c5e93469d183614" "655b7e2225ced08b3a31f086a5357eca10f2bedd40c481e532e570f4d3db62bb" "90e339f5fbc3f739c6bdb82f3553c0fe8377b5b44586414d6ec64951af1fd99b" "ae8da78bab18b45212184256d397ab713383374cc717b6f8229da235f9a55ce9" "2b16f250227e1bb0e98d14dd2327ca4fdbf3b54752b898033d4499f96121e4cb" "5f9bccf201fd171f630ba426d9870069534363bd92e327419bf269dd0345a0e6" "b25d2fffca5d821cff86895eb03d8e72af37419ec612474692db26aff34e2abf" "de8448a27a8f9cf378e31f3023d329cda6743ee2cb9c68a8db87f5d728c72ee1" "d2636cff590df97c4cb5bb6ad7f1f3f72ac841acedb6e5259a29573862637364" default)))
  '(package-selected-packages
    (quote
-    (hydra sr-speedbar cider ace-window geiser fill-column-indicator dictionary with-editor page-break-lines paredit rainbow-delimiters smart-tabs-mode undo-tree diminish slime alert sly helm-descbinds helm-describe-modes aggressive-indent ecb haskell-mode flycheck-pyflakes py-autopep8)))
+    (markdown-mode hydra sr-speedbar cider ace-window geiser fill-column-indicator dictionary with-editor page-break-lines paredit rainbow-delimiters smart-tabs-mode undo-tree diminish slime alert sly helm-descbinds helm-describe-modes aggressive-indent ecb haskell-mode flycheck-pyflakes py-autopep8)))
  '(send-mail-function (quote sendmail-send-it))
  '(znc-servers
    (quote
