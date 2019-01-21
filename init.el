@@ -143,7 +143,18 @@
      (add-hook 'cider-repl-mode-hook
                (lambda ()
                  (keys-extend-local-keymap '(cider-repl)))))
-
+    ((dired keys)
+     (add-hook 'dired-mode-hook
+               (lambda ()
+                 (keys-extend-local-keymap '(dired)))))
+    ((dired hydra)
+     (add-hook 'dired-mode-hook
+               (lambda ()
+                 (keys-extend-local-keymap '(hydra)))))
+    ((dired-subtree keys)
+     (add-hook 'dired-mode-hook
+               (lambda ()
+                 (keys-extend-local-keymap '(dired-subtree)))))
     ((elisp-mode)
      (add-hook 'emacs-lisp-mode-hook
                (lambda ()
