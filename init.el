@@ -117,6 +117,17 @@
                            (lambda () (aggressive-indent-mode 1))))
     ((aggressive-indent diminish)
      (diminish 'aggressive-indent-mode))
+    ((alert)
+     (alert-define-style
+      'ratpoison-style :title "Ratpoison alert style"
+      :notifier
+      (lambda (info)
+        (start-process "" nil "ratpoison-msg"
+                       (concatenate 'string
+                                    (plist-get info :title)
+                                    "\n"
+                                    (plist-get info :message)))))
+     (setq alert-default-style 'ratpoison-style))
     ((ascii))
     ((autorevert diminish)
      (diminish 'auto-revert-mode))
