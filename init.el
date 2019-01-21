@@ -208,11 +208,13 @@ _S_ hs-show-all   _s_ hs-show-block
 _g_ magit
 _h_ hideshow
 _m_ markdown
+_o_ org
 _p_ paredit
 "
        ("g" magit-status :exit t)
        ("h" hydra-hideshow/body :exit t)
        ("m" hydra-markdown-mode/body :exit t)
+       ("o" hydra-org/body :exit t)
        ("p" hydra-paredit/body :exit t))
      (do-for-hooks-in-list programming-modes-list
                            (lambda ()
@@ -251,13 +253,44 @@ _B_ markdown-blockquote-region
                              org-agenda-mode-hook)
                            (lambda ()
                              (keys-extend-local-keymap '(general org)))))
+    ((org hydra)
+     (defhydra hydra-org (:foreign-keys run)
+       "
+_<_ org-promote-subtree
+_>_ org-demote-subtree
+_,_ org-set-priority
+_c_ org-capture
+_C_ org-columns
+_e_ org-set-effort
+_j_ outline-next-visible-heading
+_k_ outline-previous-visible-heading
+_v_ org-paste-subtree
+_s_ org-sort-entries
+_x_ org-cut-subtree
+_t_ org-todo
+_h_ org-toggle-hold
+_q_ quit
+"
+       ("<" org-promote-subtree)
+       (">" org-demote-subtree)
+       ("," org-set-priority)
+       ("c" org-capture)
+       ("C" org-columns)
+       ("e" org-set-effort)
+       ("j" outline-next-visible-heading)
+       ("k" outline-previous-visible-heading)
+       ("v" org-paste-subtree)
+       ("s" org-sort-entries)
+       ("x" org-cut-subtree)
+       ("t" org-todo)
+       ("h" org-toggle-hold)
+       ("q" nil "quit" :exit t)))
     ((page-break-lines))
     ((page-break-lines diminish)
      (diminish page-break-lines-mode))
     ((paredit)
      (do-for-hooks-in-list lisp-mode-hooks
                            (lambda () (paredit-mode 1))))
-
     ((paredit diminish)
      (diminish 'paredit-mode))
     ((paredit keys)
