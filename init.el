@@ -205,10 +205,12 @@ _S_ hs-show-all   _s_ hs-show-block
     ((hydra)
      (defhydra hydra-hydra ()
        "
+_g_ magit
 _h_ hideshow
 _m_ markdown
 _p_ paredit
 "
+       ("g" magit-status :exit t)
        ("h" hydra-hideshow/body :exit t)
        ("m" hydra-markdown-mode/body :exit t)
        ("p" hydra-paredit/body :exit t))
@@ -226,7 +228,14 @@ _p_ paredit
                  (setq indent-tabs-mode nil)
                  (show-paren-mode 1)
                  (setq indent-tabs-mode nil))))
-    ((magit))
+    ((magit keys)
+     (add-hook 'magit-mode-hook
+               (lambda ()
+                 (keys-extend-local-keymap '(magit)))))
+    ((magit hydra)
+     (add-hook 'magit-mode-hook
+               (lambda ()
+                 (keys-extend-local-keymap '(hydra)))))
     ((markdown-mode))
     ((markdown-mode hydra)
      (defhydra hydra-markdown-mode (:foreign-keys run)
