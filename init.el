@@ -158,7 +158,6 @@
      (setq fci-rule-color "blue")
      (do-for-hooks-in-list programming-modes-list
                            (lambda () (fci-mode))))
-
     ((font-core)
      (load-file "~/.emacs.d/config.local/font.el")
      (add-to-list 'default-frame-alist
