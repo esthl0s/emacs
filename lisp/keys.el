@@ -87,7 +87,9 @@
     (sexpr ("M-p" . sexpr-fix-parens)
            ("M-s" . sexpr-edit-string-at-point))
     (undo-tree-mode ("M-z" . undo)
-                    ("M-Z" . redo))))
+                    ("M-Z" . redo))
+    (with-editor-mode ("C-c C-c" . with-editor-finish)
+                      ("C-c C-k" . with-editor-cancel))))
 
 ;; So, you want to MAKE SURE that your keybindings stick.
 ;; Well, emacs is not so cooperative here. emacs really wants
