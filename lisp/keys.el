@@ -29,6 +29,9 @@
              ("M-v" . yank))
     (ace-window ("M-w" . ace-window))
     (cider-repl ("M-<return>" . cider-repl-return))
+    (dired ("M-i" . dired-previous-line)
+           ("M-k" . dired-next-line))
+    (dired-subtree ("<tab>" . dired-subtree-cycle))
     (hideshow-lisp ("<tab>" . (lambda () (interactive)
                                 (hs-toggle-hiding)
                                 (backward-char))))
@@ -85,7 +88,9 @@
     (sexpr ("M-p" . sexpr-fix-parens)
            ("M-s" . sexpr-edit-string-at-point))
     (undo-tree-mode ("M-z" . undo)
-                    ("M-Z" . redo))))
+                    ("M-Z" . redo))
+    (with-editor-mode ("C-c C-c" . with-editor-finish)
+                      ("C-c C-k" . with-editor-cancel))))
 
 ;; So, you want to MAKE SURE that your keybindings stick.
 ;; Well, emacs is not so cooperative here. emacs really wants

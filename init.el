@@ -117,6 +117,17 @@
                            (lambda () (aggressive-indent-mode 1))))
     ((aggressive-indent diminish)
      (diminish 'aggressive-indent-mode))
+    ((alert)
+     (alert-define-style
+      'ratpoison-style :title "Ratpoison alert style"
+      :notifier
+      (lambda (info)
+        (start-process "" nil "ratpoison-msg"
+                       (concatenate 'string
+                                    (plist-get info :title)
+                                    "\n"
+                                    (plist-get info :message)))))
+     (setq alert-default-style 'ratpoison-style))
     ((ascii))
     ((autorevert diminish)
      (diminish 'auto-revert-mode))
@@ -132,6 +143,18 @@
      (add-hook 'cider-repl-mode-hook
                (lambda ()
                  (keys-extend-local-keymap '(cider-repl)))))
+    ((dired keys)
+     (add-hook 'dired-mode-hook
+               (lambda ()
+                 (keys-extend-local-keymap '(dired)))))
+    ((dired hydra)
+     (add-hook 'dired-mode-hook
+               (lambda ()
+                 (keys-extend-local-keymap '(hydra)))))
+    ((dired-subtree keys)
+     (add-hook 'dired-mode-hook
+               (lambda ()
+                 (keys-extend-local-keymap '(dired-subtree)))))
     ((elisp-mode)
      (add-hook 'emacs-lisp-mode-hook
                (lambda ()
@@ -182,11 +205,13 @@ _S_ hs-show-all   _s_ hs-show-block
     ((hydra)
      (defhydra hydra-hydra ()
        "
+_g_ magit
 _h_ hideshow
 _m_ markdown
 _o_ org
 _p_ paredit
 "
+       ("g" magit-status :exit t)
        ("h" hydra-hideshow/body :exit t)
        ("m" hydra-markdown-mode/body :exit t)
        ("o" hydra-org/body :exit t)
@@ -205,6 +230,14 @@ _p_ paredit
                  (setq indent-tabs-mode nil)
                  (show-paren-mode 1)
                  (setq indent-tabs-mode nil))))
+    ((magit keys)
+     (add-hook 'magit-mode-hook
+               (lambda ()
+                 (keys-extend-local-keymap '(magit)))))
+    ((magit hydra)
+     (add-hook 'magit-mode-hook
+               (lambda ()
+                 (keys-extend-local-keymap '(hydra)))))
     ((markdown-mode))
     ((markdown-mode hydra)
      (defhydra hydra-markdown-mode (:foreign-keys run)
@@ -406,6 +439,10 @@ _q_ quit
     ((whitespace diminish)
      (diminish 'whitespace-mode))
     ((with-editor))
+    ((with-editor keys)
+     (add-hook 'with-editor-mode-hook
+               (lambda ()
+                 (keys-extend-local-keymap '(with-editor-mode)))))
     ((x)
      (menu-bar-mode -1)
      (tool-bar-mode -1)
@@ -433,7 +470,7 @@ _q_ quit
     ("53f65fd5042438d3f0d484dda7cae17e1105ec87de1ac52fee6941247f49098a" "34b9a79a465da3e91300b99ba3b2e533cbfc777ae39887be3c5e93469d183614" "655b7e2225ced08b3a31f086a5357eca10f2bedd40c481e532e570f4d3db62bb" "90e339f5fbc3f739c6bdb82f3553c0fe8377b5b44586414d6ec64951af1fd99b" "ae8da78bab18b45212184256d397ab713383374cc717b6f8229da235f9a55ce9" "2b16f250227e1bb0e98d14dd2327ca4fdbf3b54752b898033d4499f96121e4cb" "5f9bccf201fd171f630ba426d9870069534363bd92e327419bf269dd0345a0e6" "b25d2fffca5d821cff86895eb03d8e72af37419ec612474692db26aff34e2abf" "de8448a27a8f9cf378e31f3023d329cda6743ee2cb9c68a8db87f5d728c72ee1" "d2636cff590df97c4cb5bb6ad7f1f3f72ac841acedb6e5259a29573862637364" default)))
  '(package-selected-packages
    (quote
-    (tramp-term markdown-mode hydra sr-speedbar cider ace-window geiser fill-column-indicator dictionary with-editor page-break-lines paredit rainbow-delimiters smart-tabs-mode undo-tree diminish slime alert sly helm-descbinds helm-describe-modes aggressive-indent ecb haskell-mode flycheck-pyflakes py-autopep8)))
+    (tramp-term dired-subtree magit markdown-mode hydra sr-speedbar cider ace-window geiser fill-column-indicator dictionary with-editor page-break-lines paredit rainbow-delimiters smart-tabs-mode undo-tree diminish slime alert sly helm-descbinds helm-describe-modes aggressive-indent ecb haskell-mode flycheck-pyflakes py-autopep8)))
  '(send-mail-function (quote sendmail-send-it))
  '(znc-servers
    (quote
