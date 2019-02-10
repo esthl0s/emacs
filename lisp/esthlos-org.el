@@ -267,7 +267,7 @@ in the current buffer. Relies on `org-archive-headline-tags-to-archive'"
                  (org-agenda-skip-function 'org-skip-if-actionable)
                  (org-agenda-sorting-strategy
                   '(category-keep))))
-          (tags "-repeater-hold-prioritized"
+          (tags "-BLOCKED=\"t\"-repeater-hold-prioritized"
                 ((org-agenda-overriding-header "Unprioritized, Unblocked")
                  (org-agenda-skip-function 'org-todo-is-not-todo-action-waiting-inprogress)
                  (org-agenda-sorting-strategy
