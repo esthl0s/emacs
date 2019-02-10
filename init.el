@@ -154,7 +154,8 @@
     ((custom)
      (setq custom-file
            (expand-file-name "custom.el"
-                             user-emacs-directory)))
+                             user-emacs-directory))
+     (load custom-file))
     ((dired keys)
      (add-hook 'dired-mode-hook
                (lambda ()
