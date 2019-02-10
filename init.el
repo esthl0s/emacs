@@ -259,6 +259,7 @@ _B_ markdown-blockquote-region
 _<_ org-promote-subtree
 _>_ org-demote-subtree
 _,_ org-set-priority
+_a_ org-agenda
 _c_ org-capture
 _C_ org-columns
 _e_ org-set-effort
@@ -274,6 +275,7 @@ _q_ quit
        ("<" org-promote-subtree)
        (">" org-demote-subtree)
        ("," org-set-priority)
+       ("a" org-agenda)
        ("c" org-capture)
        ("C" org-columns)
        ("e" org-set-effort)
