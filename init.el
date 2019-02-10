@@ -67,9 +67,17 @@
                  (hl-line-mode 1)
                  (auto-fill-mode 1)))
      ;; load paths
-     (add-to-list 'load-path "/home/ate/.emacs.d/lisp")
-     (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
-     (setq backup-directory-alist `(("." . "~/.emacs.d/saves")))
+     (add-to-list 'load-path
+                  (expand-file-name "lisp"
+                                    user-emacs-directory))
+     (add-to-list 'custom-theme-load-path
+                  (expand-file-name "themes"
+                                    user-emacs-directory))
+     ;; load the theme
+     (load-theme 'ate-light t)
+     (setq backup-directory-alist
+           `(("." . (expand-file-name "saves"
+                                      user-emacs-directory))))
      (setq default-directory "~/")
      ;; easy binding
      (defmacro bind-in-map (map bindings)
@@ -174,7 +182,8 @@
      (do-for-hooks-in-list programming-modes-list
                            (lambda () (fci-mode))))
     ((font-core)
-     (load-file "~/.emacs.d/config.local/font.el")
+     (load-file (expand-file-name "config.local/font.el"
+                                  user-emacs-directory))
      (add-to-list 'default-frame-alist
                   `(font . ,myfont))
      (set-default-font myfont))
