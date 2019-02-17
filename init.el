@@ -505,8 +505,13 @@ _q_ quit
         (package-refresh-contents)
         (switch-to-buffer "*init-install*")
         (dolist (p to-install)
-          (princ (format "Installing %s\n" p)
+          (princ (format "Installing %s ..." p)
                  (get-buffer "*init-install*"))
-          (package-install p))))))
+          (condition-case
+              (package-install p)
+              (princ (format "success.\n" p)
+                     (get-buffer "*init-install*"))
+            (error (princ (format "FAILURE.\n" p)
+                          (get-buffer "*init-install*")))))))))
 
 (load-theme 'ate-light t)
