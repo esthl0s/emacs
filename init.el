@@ -25,7 +25,7 @@
                   (let ((requirement-report (init|check-requirements (car p))))
                     (if (not (init|is-ok requirement-report))
                         requirement-report
-                      (list (init|eval-body (cdr p)))))))
+                      (init|eval-body (cdr p))))))
           s))
 
 (setq
@@ -473,7 +473,7 @@ _q_ quit
      (setq inhibit-splash-screen t)))))
 
 (setq *init-errors*
-      (seq-filter (lambda (i) (not (init|is-ok (cadr i))))
+      (seq-filter (lambda (i) (not (init|is-ok (cdr i))))
                   *init-report*))
 
 (if (not (null *init-errors*))
