@@ -507,10 +507,10 @@ _q_ quit
         (dolist (p to-install)
           (princ (format "Installing %s ..." p)
                  (get-buffer "*init-install*"))
-          (condition-case
+          (condition-case nil
               (package-install p)
-              (princ (format "success.\n" p)
-                     (get-buffer "*init-install*"))
+            (princ (format "success.\n" p)
+                   (get-buffer "*init-install*"))
             (error (princ (format "FAILURE.\n" p)
                           (get-buffer "*init-install*")))))))))
 
