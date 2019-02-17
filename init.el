@@ -1,22 +1,31 @@
-(defun all-required (requirements)
-  (condition-case nil
-      (progn (mapcar 'require
-                     requirements)
-             'ok)
-    (error 'fail)))
+(defun init|is-ok (x)
+  (eql 'ok x))
 
-(defun eval-body (body-forms)
-  (condition-case nil
-      (progn (mapcar 'eval body-forms)
-             'ok ())
-    (error 'body)))
+(defun init|check-requirements (requirements)
+  (let ((current-requirement nil))
+    (condition-case nil
+        (progn (dolist (requirement requirements)
+                 (setq current-requirement requirement)
+                 (require requirement))
+               'ok)
+      (error current-requirement))))
+
+(defun init|eval-body (body-forms)
+  (let ((current-form nil))
+    (condition-case nil
+        (progn (dolist (form body-forms)
+                 (setq current-form form)
+                 (eval form))
+               'ok)
+      (error current-form))))
 
 (defun try-load-init-sexpr (s)
   (mapcar (lambda (p)
             (cons (car p)
-                  (if (eql 'fail (all-required (car p)))
-                      'requirements
-                    (eval-body (cdr p)))))
+                  (let ((requirement-report (init|check-requirements (car p))))
+                    (if (not (init|is-ok requirement-report))
+                        requirement-report
+                      (list (init|eval-body (cdr p)))))))
           s))
 
 (setq
@@ -465,12 +474,19 @@ _q_ quit
      (setq inhibit-splash-screen t)))))
 
 (setq *init-errors*
-      (append (seq-filter (lambda (i) (eq (cdr i) 'requirements))
-                          *init-report*)
-              (seq-filter (lambda (i) (eq (cdr i) 'body))
-                          *init-report*)))
+      (seq-filter (lambda (i) (not (init|is-ok (cadr i))))
+                  *init-report*))
 
 (if (not (null *init-errors*))
-    (display-warning 'init
-                     "Error during init. Check *init-errors*."
-                     :warning))
+    (progn
+      (switch-to-buffer "*init-errors*")
+      (princ ";; NOTE: Errors in the \"emacs\" category cause other errors further down!")
+      (princ (pp *init-errors*)
+             (get-buffer "*init-errors*"))
+      (beginning-of-buffer)
+      ;; (display-warning 'init
+      ;;                  "Error during init. Check *init-errors*."
+      ;;                  :warning)
+      ))
+
+(load-theme 'ate-light t)
