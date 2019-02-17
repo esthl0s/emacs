@@ -77,16 +77,15 @@
                  (auto-fill-mode 1)))
      ;; load paths
      (add-to-list 'load-path
-                  (expand-file-name "lisp"
-                                    user-emacs-directory))
-     (add-to-list 'custom-theme-load-path
-                  (expand-file-name "themes"
+                  (expand-file-name "lisp/"
                                     user-emacs-directory))
      ;; load the theme
-     (load-theme 'ate-light t)
+     (setq custom-theme-directory
+           (expand-file-name "themes/"
+                             user-emacs-directory))
      (setq backup-directory-alist
-           `(("." . (expand-file-name "saves"
-                                      user-emacs-directory))))
+           `(("." . ,(expand-file-name "saves"
+                                       user-emacs-directory))))
      (setq default-directory "~/")
      ;; easy binding
      (defmacro bind-in-map (map bindings)
