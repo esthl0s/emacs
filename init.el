@@ -28,9 +28,8 @@
                       (init|eval-body (cdr p))))))
           s))
 
-(setq
- *init-report*
- (try-load-init-sexpr
+(defvar
+  *init-sexpr*
   '(((emacs)
      ;; look and feel
      (prefer-coding-system 'us-ascii)
@@ -424,7 +423,7 @@ _q_ quit
      (defun find-file-root ()
        (interactive)
        (require 'tramp)
-       (let* ( ;; use a separate history list for "root" files.
+       (let* (;; use a separate history list for "root" files.
               (file-name-history find-f (ile-root-history))
               (name (or buffer-file-name default-directory))
               (tramp (and (tramp-tramp-file-p name)
@@ -470,7 +469,10 @@ _q_ quit
     ((x)
      (menu-bar-mode -1)
      (tool-bar-mode -1)
-     (setq inhibit-splash-screen t)))))
+     (setq inhibit-splash-screen t))))
+
+(setq *init-report*
+      (try-load-init-sexpr *init-sexpr*))
 
 (setq *init-errors*
       (seq-filter (lambda (i) (not (init|is-ok (cdr i))))
@@ -487,5 +489,24 @@ _q_ quit
       ;;                  "Error during init. Check *init-errors*."
       ;;                  :warning)
       ))
+
+(defun init-install-all ()
+  (interactive)
+  (let ((to-install
+         (seq-filter (lambda (x) (not (or (package-installed-p x)
+                                          (featurep x))))
+                     (remove-duplicates
+                      (apply #'append
+                             (mapcar #'car
+                                     *init-sexpr*))))))
+    (if (null to-install)
+        (message "Nothing to install!")
+      (progn
+        (package-refresh-contents)
+        (switch-to-buffer "*init-install*")
+        (dolist (p to-install)
+          (princ (format "Installing %s\n" p)
+                 (get-buffer "*init-install*"))
+          (package-install p))))))
 
 (load-theme 'ate-light t)
