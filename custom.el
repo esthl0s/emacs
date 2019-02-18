@@ -9,7 +9,7 @@
     ("53f65fd5042438d3f0d484dda7cae17e1105ec87de1ac52fee6941247f49098a" default)))
  '(package-selected-packages
    (quote
-    (tramp-term undo-tree sr-speedbar smart-tabs-mode slime s rainbow-delimiters paredit page-break-lines markdown-mode magit hydra geiser fill-column-indicator dired-subtree diminish dictionary cider calfw-org calfw alert aggressive-indent ace-window))))
+    (with-editor cider-repl tramp-term undo-tree sr-speedbar smart-tabs-mode slime s rainbow-delimiters paredit page-break-lines markdown-mode magit hydra geiser fill-column-indicator dired-subtree diminish dictionary cider calfw-org calfw alert aggressive-indent ace-window))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
