@@ -195,6 +195,7 @@
      (add-to-list 'default-frame-alist
                   `(font . ,myfont))
      (set-default-font myfont))
+    ((gcloud))
     ((geiser paredit)
      (add-hook 'geiser-mode-hook #'paredit-mode))
     ((geiser undo-tree)
