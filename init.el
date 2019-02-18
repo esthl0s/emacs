@@ -195,7 +195,6 @@
      (add-to-list 'default-frame-alist
                   `(font . ,myfont))
      (set-default-font myfont))
-    ((gcloud))
     ((geiser paredit)
      (add-hook 'geiser-mode-hook #'paredit-mode))
     ((geiser undo-tree)
@@ -441,6 +440,7 @@ _q_ quit
            ;; allow some user customization
            (run-hooks 'find-file-root-hook))))
      (global-set-key [(control x) (control r)] 'find-file-root))
+    ((tramp gcloud))
     ((tramp-term))
     ((undo-tree)
      (do-for-hooks-in-list programming-modes-list
