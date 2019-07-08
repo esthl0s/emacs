@@ -1,6 +1,6 @@
 (add-to-list 'tramp-methods
              '("gcloud"
-               (tramp-login-program        "gcloud compute ssh")
+               (tramp-login-program        "export USER=root ; gcloud compute ssh")
                (tramp-login-args           (("%h")))
                (tramp-async-args           (("-q")))
                (tramp-remote-shell         "/bin/sh")
