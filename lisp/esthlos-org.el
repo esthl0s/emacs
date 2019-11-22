@@ -48,6 +48,9 @@
 	  (quote (("Effort_ALL" .
 			   "0 0:10 0:20 0:30 1:00 1:30 2:003:00 4:00 6:00 8:00 10:00 20:00"))))
 
+;; enable indent mode
+(setq org-startup-indented t)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; todo
 
@@ -100,6 +103,7 @@
 	  "%40ITEM %TODO %3PRIORITY %10TAGS %17Effort(Estimated Effort){:} %12CLOCKSUM")
 
 (setq org-tags-exclude-from-inheritance '("prioritized" "goal"))
+(setq org-use-property-inheritance '("PRIORITY"))
 
 (defun org-get-tags () (org-element-property :tags (org-element-at-point)))
 
@@ -183,19 +187,34 @@ in the current buffer. Relies on `org-archive-headline-tags-to-archive'"
 ;; don't show tags in the headline copy
 (setq org-agenda-remove-tags t)
 
+;;;;;;;;;;;;;;;;
+;; building the agenda
 
 ;;; functions for building the agenda
-
 (defun outline-ascend-and-call (f)
   (save-excursion
-	(labels ((go-up-and-test (previous-point)
-							 (outline-up-heading 1)
+	(labels ((go-up-and-test (previous-point result)
+							 (ignore-errors (outline-up-heading 1))
 							 (cond
-							  ((= (point) previous-point)
+							  (result result)
+							  ((= (point) previous-point) nil)
+							  (t (go-up-and-test (point) (funcall f))))))
+	  (go-up-and-test (point) nil))))
+
+(defun outline-call-and-ascend (f)
+  (save-excursion
+	(labels ((go-up-and-test (previous-point previous-result)
+							 (cond
+							  (previous-result previous-result)
+							  ((and (integer-or-marker-p previous-point)
+									(= (point) previous-point))
 							   nil)
-							  ((funcall f) t)
-							  (t (go-up-and-test (point))))))
-	  (go-up-and-test (point)))))
+							  (t (go-up-and-test (point)
+												 (progn
+												   (ignore-errors
+													 (outline-up-heading 1))
+												   (funcall f)))))))
+	  (go-up-and-test nil (funcall f)))))
 
 (defun outline-descend-and-call (f)
   "Depth-first search going down"
@@ -209,52 +228,90 @@ in the current buffer. Relies on `org-archive-headline-tags-to-archive'"
 	  (widen)
 	  rtn)))
 
-(defun org-headline-get-property (p)
-  (cdr (assoc p (org-entry-properties (point)))))
 
-(defun org-headline-is-project ()
-  (equal "PROJECT" (org-headline-get-property "TODO")))
+;; functions for managing goals
+(defun org-link-goal ()
+  "Link the headline at point to a goal."
+  (interactive)
+  (org-entry-put
+   (point)
+   "goal"
+   (message (format "[[%s]]"
+					(save-excursion
+					  (message "Place point on goal, then exit with C-M-c")
+					  (recursive-edit)
+					  (org-get-heading))))))
 
-(defun org-headline-has-goal ()
-  (if (equal nil (org-headline-get-property "goal"))
-	  nil
-	(point)))
+(defun org-goto-goal ()
+  "Jump to the goal of the current headline, or broadcast an error."
+  (interactive)
+  (let ((goal
+		 (outline-call-and-ascend
+		  (lambda ()
+			(org-entry-get (point) "goal")))))
+	(if goal
+		(org-open-link-from-string goal))))
 
-(defun org-headline-is-action ()
-  (let ((todo (org-headline-get-property "TODO")))
-	(or (equal todo "ACTION")
-		(equal todo "WAITING")
-		(equal todo "INPROGRESS"))))
 
-(defun org-headline-is-holding ()
-  (member "hold" (org-get-tags)))
+;; project itemization
 
-(defun org-unactionable-project ()
-  (and (org-headline-is-project)
-	   (not (org-headline-is-holding))
-	   (not (outline-descend-and-call
-			 (lambda ()
-			   (or (org-unactionable-project)
-				   (org-headline-is-action)))))))
+(defun org-headline-is-type (type)
+  (equal type (org-entry-get (point) "TODO")))
 
-(defun org-skip-if-actionable ()
-  (if (org-unactionable-project) nil (point)))
+(defun org-headline-is-subproject ()
+  (and (org-headline-is-type "PROJECT")
+	   (outline-ascend-and-call
+		(lambda () (org-headline-is-type "PROJECT")))))
 
-(defun org-todo-is-not-todo-action-waiting-inprogress ()
-  (if (member (org-headline-get-property "TODO")
-			  (list "TODO" "ACTION" "WAITING" "INPROGRESS"))
-	  nil
-	(point)))
+(defun org-headline-doesnt-need-goal ()
+  (if (not (or (org-headline-is-subproject)
+			   (org-entry-get (point) "goal")))
+	  (point)))
 
-(defun org-todo-is-not-action-inprogress ()
-  (if (member (org-headline-get-property "TODO")
-			  (list "ACTION" "INPROGRESS"))
-	  nil
-	(point)))
+(defun org-headline-is-not-stuck-project ()
+  (if (or (outline-descend-and-call
+		   (lambda ()
+			 (some #'org-headline-is-type
+				   '("PROJECT" "ACTION" "INPROGRESS" "WAITING"))))
+		  (org-entry-blocked-p))
+	  (point)
+	nil))
+
+;; want: list of things which are NOT blocked AND NOT scheduled
+;; aka list of things which are NOT (blocked or scheduled)
+;; so we need to skip things which are blocked or scheduled
+(defun org-headline-is-scheduled-or-blocked ()
+  (if (or (org-entry-blocked-p)
+		  (org-entry-get (point) "SCHEDULED"))
+	  (point)
+	nil))
+
+(defun org-test ()
+  (interactive)
+  (message (if (org-headline-is-scheduled-or-blocked) "true" "false")))
+
+
+;; functions to manage prioritization
+
 
 (setq org-agenda-custom-commands
 	  '(("z" "Present items"
-		 ((tags "+TODO=\"INPROGRESS\""
+		 ((agenda ""
+				  ((org-agenda-overriding-header "Agenda")))
+		  (tags "+TODO=\"INPROGRESS\"-ice"
+				((org-agenda-overriding-header "Actions in Progress")))
+		  (tags "+TODO=\"WAITING\"-ice"
+				((org-agenda-overriding-header "Actions in Waiting")))
+		  (tags "+TODO=\"PROJECT\"-ice"
+				((org-agenda-overriding-header "Stuck Projects")
+				 (org-agenda-skip-function 'org-headline-is-not-stuck-project)))
+		  (tags "+TODO=\"ACTION\"-ice"
+				((org-agenda-overriding-header "Unscheduled Actions")
+				 (org-agenda-skip-function 'org-headline-is-scheduled-or-blocked)))))
+		("x" "Present items"
+		 ((agenda ""
+				  ((org-agenda-overriding-header "In progress")))
+		  (tags "+TODO=\"INPROGRESS\""
 				((org-agenda-overriding-header "In progress")))
 		  (tags "+TODO=\"WAITING\""
 				((org-agenda-overriding-header "In Waiting")))
@@ -262,9 +319,12 @@ in the current buffer. Relies on `org-archive-headline-tags-to-archive'"
 				((org-agenda-overriding-header "To Refile")
 				 (org-tags-match-list-sublevels nil)))
 		  (tags "+TODO=\"PROJECT\""
-				((org-agenda-overriding-header "Projects")))
+				((org-agenda-overriding-header "To Itemize")
+				 (org-agenda-skip-function 'org-skip-if-actionable)
+				 (org-agenda-sorting-strategy
+				  '(category-keep))))
 		  (tags "+TODO=\"PROJECT\""
-				((org-agenda-overriding-header "Stuck Projects")
+				((org-agenda-overriding-header "To Itemize")
 				 (org-agenda-skip-function 'org-skip-if-actionable)
 				 (org-agenda-sorting-strategy
 				  '(category-keep))))))))

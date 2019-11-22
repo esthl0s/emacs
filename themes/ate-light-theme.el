@@ -80,7 +80,7 @@
 	,(face outline-8 :foreground "DeepPink1")
 ;;; Org mode
 	,(face org-default :inherit default)
-	,(face org-hide :inherit mode-line-inactive)
+	,(face org-hide :inherit default)
 	,(face org-level-1 :inherit outline-1)
 	,(face org-level-2 :inherit outline-2)
 	,(face org-level-3 :inherit outline-3)

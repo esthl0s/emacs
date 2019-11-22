@@ -1,44 +1,17 @@
-(defun init|is-ok (x)
-  (eql 'ok x))
-
-(defun init|check-requirements (requirements)
-  (let ((current-requirement nil))
-	(condition-case nil
-		(progn (dolist (requirement requirements)
-				 (setq current-requirement requirement)
-				 (require requirement))
-			   'ok)
-	  (error current-requirement))))
-
-(defun init|eval-body (body-forms)
-  (let ((current-form nil))
-	(condition-case nil
-		(progn (dolist (form body-forms)
-				 (setq current-form form)
-				 (eval form))
-			   'ok)
-	  (error current-form))))
-
-(defun try-load-init-sexpr (s)
-  (mapcar (lambda (p)
-			(cons (car p)
-				  (let ((requirement-report (init|check-requirements (car p))))
-					(if (not (init|is-ok requirement-report))
-						requirement-report
-					  (init|eval-body (cdr p))))))
-		  s))
-
+;; The init sexpr is an alist. Each key K is a list of features, and
+;; each value V is a list of sexprs. When all features in K are
+;; available, the sexprs in V are evaluated in order.
 (defvar
   *init-sexpr*
   '(((emacs)
 	 ;; look and feel
 	 (menu-bar-mode -1)
 	 (tool-bar-mode -1)
+	 (display-battery-mode -1)
 	 (setq inhibit-splash-screen t)
 	 (prefer-coding-system 'us-ascii)
 	 (global-font-lock-mode 1)
 	 (setq initial-scratch-message "")
-	 (display-battery-mode 1)
 	 (set-scroll-bar-mode 'nil)
 	 (setq-default indent-tabs-mode t)
 	 (setq indent-line-function 'insert-tab)
@@ -50,33 +23,13 @@
 	 (setq-default tab-width 4)
 	 (setq backup-by-copying t)
 	 (setq read-quoted-char-radix 10)
-	 (global-set-key (kbd "C-c t") 'ansi-term)
-	 (defun term-toggle-mode ()
-	   (interactive)
-	   (if (term-in-line-mode)
-		   (term-char-mode)
-		 (term-line-mode)))
-	 (add-hook 'term-mode-hook
-			   (lambda ()
-				 (define-key term-mode-map
-				   (kbd "C-c C-a")
-				   'term-toggle-mode)
-				 (define-key term-raw-map
-				   (kbd "C-c C-a")
-				   'term-toggle-mode)))
 	 (global-set-key (kbd "<C-S-M-right>") 'shrink-window-horizontally)
 	 (global-set-key (kbd "<C-S-M-left>") 'enlarge-window-horizontally)
 	 (global-set-key (kbd "<C-S-M-down>") 'shrink-window)
 	 (global-set-key (kbd "<C-S-M-up>") 'enlarge-window)
 	 (global-set-key (kbd "C-'") 'comment-or-uncomment-region)
-	 (setq ispell-program-name "/usr/bin/aspell")
 	 (setq mail-host-address "esthlos.com")
 	 (setq browse-url-browser-function 'browse-url-firefox)
-	 (add-hook 'text-mode-hook
-			   (lambda ()
-				 (setq fill-column 80)
-				 (hl-line-mode 1)
-				 (auto-fill-mode 1)))
 	 ;; load paths
 	 (add-to-list 'load-path
 				  (expand-file-name "lisp/"
@@ -85,19 +38,11 @@
 	 (setq custom-theme-directory
 		   (expand-file-name "themes/"
 							 user-emacs-directory))
+	 ;; set the backup directory
 	 (setq backup-directory-alist
 		   `(("." . ,(expand-file-name "saves"
 									   user-emacs-directory))))
 	 (setq default-directory "~/")
-	 ;; easy binding
-	 (defmacro bind-in-map (map bindings)
-	   `(dolist (binding-pair ,bindings)
-		  (define-key ,map (kbd (car binding-pair))
-			(cadr binding-pair))))
-	 (defmacro bind-everywhere (bindings)
-	   `(dolist (binding-pair ,bindings)
-		  (global-set-key (kbd (car binding-pair))
-						  (cadr binding-pair))))
 	 ;; easy add to hook set
 	 (defun do-for-hooks-in-list (hook-list function)
 	   (dolist (hook hook-list)
@@ -148,6 +93,8 @@
 	 (setq calendar-latitude 41.2)
 	 (setq calendar-longitude -73.7)
 	 (setq calendar-location-name "Armonk, NY"))
+	((calfw))
+	((calfw-org))
 	((cc-mode)
 	 (do-for-hooks-in-list '(c-mode-hook
 							 java-mode-hook)
@@ -205,6 +152,7 @@
 		   (expand-file-name "custom.el"
 							 user-emacs-directory))
 	 (load custom-file))
+	((define-word))
 	((dired)
 	 (add-hook 'dired-mode-hook
 			   (lambda ()
@@ -221,6 +169,10 @@
 	 (add-hook 'dired-mode-hook
 			   (lambda ()
 				 (keys-extend-local-keymap '(dired-subtree)))))
+	((dockerfile-mode)
+	 (add-hook 'dockerfile-mode-hook
+			   (lambda ()
+				 (keys-extend-local-keymap '(general)))))
 	((elisp-mode)
 	 (add-hook 'emacs-lisp-mode-hook
 			   (lambda ()
@@ -228,6 +180,14 @@
 				 (show-paren-mode 1))))
 	((eldoc diminish)
 	 (diminish 'eldoc-mode))
+	((eshell)
+	 (add-hook 'eshell-mode-hook
+			   (lambda ()
+				 (set-buffer-process-coding-system 'utf-8-unix
+												   'utf-8-unix)))
+	 (defun eshell-new ()
+	   (interactive)
+	   (eshell 'N)))
 	((fill-column-indicator)
 	 (setq fci-rule-use-dashes t)
 	 (setq fci-rule-color "blue")
@@ -270,15 +230,20 @@ _S_ hs-show-all   _s_ hs-show-block
 	   ("s" hs-show-block)
 	   ("l" hs-hide-level)
 	   ("q" nil "quit" :exit t)))
+	((highlight-indent-guides)
+	 (setq highlight-indent-guides-responsive 'top)
+	 (setq highlight-indent-guides-method 'fill))
 	((hydra)
 	 (defhydra hydra-hydra ()
 	   "
+_e_ english
 _g_ magit
 _h_ hideshow
 _m_ markdown
 _o_ org
 _p_ paredit
 "
+	   ("e" hydra-english/body :exit t)
 	   ("g" magit-status :exit t)
 	   ("h" hydra-hideshow/body :exit t)
 	   ("m" hydra-markdown-mode/body :exit t)
@@ -287,6 +252,21 @@ _p_ paredit
 	 (do-for-hooks-in-list programming-modes-list
 						   (lambda ()
 							 (keys-extend-local-keymap '(hydra)))))
+	((hydra define-word ispell)
+	 (defhydra hydra-english (:foreign-keys run)
+	   "
+^Writing^
+^^^^^^^---------
+_d_ define-word
+_w_ ispell-word
+_b_ ispell-buffer
+"
+	   ("d" define-word-at-point)
+	   ("w" ispell-word)
+	   ("b" ispell-buffer)
+	   ("q" nil "quit" :exit t)))
+	((ispell)
+	 (setq ispell-program-name "/usr/bin/aspell"))
 	((keys)
 	 (do-for-hooks-in-list programming-modes-list
 						   (lambda ()
@@ -304,7 +284,10 @@ _p_ paredit
 	 (add-hook 'magit-mode-hook
 			   (lambda ()
 				 (keys-extend-local-keymap '(hydra)))))
-	((markdown-mode))
+	((markdown-mode)
+	 (add-hook 'markdown-mode-hook
+			   (lambda ()
+				 (setq indent-tabs-mode nil))))
 	((markdown-mode hydra)
 	 (defhydra hydra-markdown-mode (:foreign-keys run)
 	   "
@@ -325,6 +308,7 @@ _B_ markdown-blockquote-region
 _<_ org-promote-subtree
 _>_ org-demote-subtree
 _,_ org-set-priority
+_A_ org-archive-subtree
 _a_ org-agenda
 _c_ org-capture
 _C_ org-columns
@@ -344,6 +328,7 @@ _q_ quit
 	   (">" org-demote-subtree)
 	   ("," org-set-priority)
 	   ("a" org-agenda)
+	   ("A" org-archive-subtree)
 	   ("c" org-capture)
 	   ("C" org-columns)
 	   ("e" org-set-effort)
@@ -425,11 +410,13 @@ _q_ quit
 		   '((sbcl ("/usr/bin/sbcl"))
 			 (ccl ("/usr/bin/ccl"))))
 	 (mapcar (lambda (x) (add-to-list 'slime-contribs x))
-			 '(slime-repl
+			 '(slime-autodoc
+			   slime-repl
 			   slime-references
 			   slime-highlight-edits
-			   slime-scratch))
-	 (setq common-lisp-hyperspec-root "lisp.esthlos.com/clhs/")
+			   slime-scratch
+			   slime-fancy-inspector))
+	 (setq common-lisp-hyperspec-root "file:///home/ate/.clhs/")
 	 (setq browse-url-firefox-program "firefox")
 	 (defun override-slime-repl-bindings-with-paredit ()
 	   (define-key slime-repl-mode-map
@@ -453,10 +440,31 @@ _q_ quit
 	   ((c-indent-line . c-basic-offset)
 		(c-indent-region . c-basic-offset)))
 	 (smart-tabs-insinuate 'c 'python 'tex))
+	((tabulated-list)
+	 (add-hook 'tabulated-list-mode-hook
+			   (lambda ()
+				 (keys-extend-local-keymap '(general)))))
 	((term)
+	 (global-set-key (kbd "C-c t") 'ansi-term)
+	 (defun term-toggle-mode ()
+	   (interactive)
+	   (if (term-in-line-mode)
+		   (term-char-mode)
+		 (term-line-mode)))
+	 (add-hook 'term-mode-hook
+			   (lambda ()
+				 (define-key term-mode-map
+				   (kbd "C-c C-t")
+				   'term-toggle-mode)
+				 (define-key term-raw-map
+				   (kbd "C-c C-t")
+				   'term-toggle-mode)))
 	 (add-hook 'term-mode-hook 'font-lock-mode)
 	 (add-hook 'term-mode-hook
-			   (lambda () (setq default-directory "~/"))))
+			   (lambda () (setq default-directory "~/")))
+	 (defadvice ansi-term (after advise-ansi-term-coding-system)
+	   (set-buffer-process-coding-system 'utf-8-unix 'utf-8-unix))
+	 (ad-activate 'ansi-term))
 	((tex-mode)
 	 (setq tex-default-mode 'latex-mode)
 	 (add-hook 'plain-tex-mode-hook
@@ -467,32 +475,22 @@ _q_ quit
 			   (lambda ()
 				 (setq indent-tabs-mode t)
 				 (setq tex-fontify-script nil))))
+	((text-mode)
+	 (add-hook 'text-mode-hook
+			   (lambda ()
+				 (setq fill-column 80)
+				 (hl-line-mode 1)
+				 (auto-fill-mode 1))))
 	((tramp)
-	 (defvar find-file-root-prefix (if (featurep 'xemacs)
-									   "/[sudo/root@localhost]"
-									 "/sudo:root@localhost:"))
-	 (defvar find-file-root-history nil)
-	 (defvar find-file-root-hook nil)
 	 (defun find-file-root ()
 	   (interactive)
-	   (require 'tramp)
-	   (let* (;; use a separate history list for "root" files.
-			  (file-name-history find-f (ile-root-history))
-			  (name (or buffer-file-name default-directory))
-			  (tramp (and (tramp-tramp-file-p name)
-						  (tramp-dissect-file-name name)))
-			  path dir file)
-		 ;; If called from a "root" file, we need to fix up the path.
-		 (when tramp
-		   (setq path (tramp-file-name-localname tramp)
-				 dir (file-name-directory path)))
-		 (when (setq file (read-file-name "Find file (UID = 0): " dir path))
-		   (find-file (concat find-file-root-prefix file))
-		   ;; If this all succeeded save our new history list.
-		   (setq find-file-root-history file-name-history)
-		   ;; allow some user customization
-		   (run-hooks 'find-file-root-hook))))
-	 (global-set-key [(control x) (control r)] 'find-file-root))
+	   (find-file
+		(format "/%s::%s"
+				(if (executable-find "sudo") "sudo" "su")
+				(file-truename (read-file-name "su find file: ")))))
+	 (add-hook 'term-mode-hook
+			   (lambda ()
+				 (keys-extend-local-keymap '(file)))))
 	((tramp gcloud))
 	((tramp-term))
 	((undo-tree)
@@ -519,10 +517,45 @@ _q_ quit
 	((with-editor keys)
 	 (add-hook 'with-editor-mode-hook
 			   (lambda ()
-				 (keys-extend-local-keymap '(with-editor-mode)))))))
+				 (keys-extend-local-keymap '(with-editor-mode)))))
+	((yaml-mode))
+	((yaml-mode highlight-indent-guides)
+	 (add-hook 'yaml-mode-hook
+			   (lambda ()
+				 (highlight-indent-guides-mode 1)
+				 (hl-line-mode -1))))))
 
-(setq *init-report*
-	  (try-load-init-sexpr *init-sexpr*))
+(defun init|is-ok (x)
+  (eql 'ok x))
+
+(defun init|check-requirements (requirements)
+  (let ((current-requirement nil))
+	(condition-case nil
+		(progn (dolist (requirement requirements)
+				 (setq current-requirement requirement)
+				 (require requirement))
+			   'ok)
+	  (error current-requirement))))
+
+(defun init|eval-body (body-forms)
+  (let ((current-form nil))
+	(condition-case nil
+		(progn (dolist (form body-forms)
+				 (setq current-form form)
+				 (eval form))
+			   'ok)
+	  (error current-form))))
+
+(defun init|load-init-sexpr (s)
+  (mapcar (lambda (p)
+			(cons (car p)
+				  (let ((requirement-report (init|check-requirements (car p))))
+					(if (not (init|is-ok requirement-report))
+						requirement-report
+					  (init|eval-body (cdr p))))))
+		  s))
+
+(setq *init-report* (init|load-init-sexpr *init-sexpr*))
 
 (setq *init-errors*
 	  (seq-filter (lambda (i) (not (init|is-ok (cdr i))))
@@ -540,15 +573,27 @@ _q_ quit
 	  ;;                  :warning)
 	  ))
 
-(defun init-install-all ()
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; useful utilities
+
+(defun init|list-requirements ()
+  "List all features required by the init sexpr."
+  (sort (remove-duplicates (apply #'append
+								  (mapcar #'car
+										  *init-sexpr*)))
+		(lambda (x y) (string< (symbol-name x)
+							   (symbol-name y)))))
+
+(defun init|needed-requirements ()
+  "List all features which need to be installed."
+  (seq-filter (lambda (x) (not (or (package-installed-p x)
+								   (featurep x))))
+			  (init|list-requirements)))
+
+(defun init|install-all ()
+  "Use the package manager to install all needed packages."
   (interactive)
-  (let ((to-install
-		 (seq-filter (lambda (x) (not (or (package-installed-p x)
-										  (featurep x))))
-					 (remove-duplicates
-					  (apply #'append
-							 (mapcar #'car
-									 *init-sexpr*))))))
+  (let ((to-install (init|needed-requirements)))
 	(if (null to-install)
 		(message "Nothing to install!")
 	  (progn

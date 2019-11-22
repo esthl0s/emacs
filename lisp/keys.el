@@ -2,6 +2,10 @@
 
 (require 'cl)
 
+;; two variables
+;; keys-bindings, which is global
+;; keys-bidings-buffer, which is buffer local
+
 (make-local-variable 'keys-buffer-binding-sets)
 (setq-default keys-buffer-binding-sets '())
 
@@ -29,7 +33,8 @@
 			 ("M-v" . yank)
 			 ("C-b" . switch-to-buffer))
 	(ace-window ("M-w" . ace-window))
-	(cider ("M-<return>" . cider-eval-last-sexp))
+	(cider ("M-<return>" . cider-eval-last-sexp)
+		   ("C-M-d" . cider-doc))
 	(cider-repl ("M-<return>" . cider-repl-return))
 	(dired ("M-i" . dired-previous-line)
 		   ("M-k" . dired-next-line))
@@ -38,6 +43,8 @@
 								(hs-toggle-hiding)
 								(backward-char))))
 	(hydra ("C-c h" . hydra-hydra/body))
+	(file ("C-x M-f" . find-file-root)
+		  ("C-x C-r" . view-file))
 	(org ("C-M-j" . org-promote-subtree)
 		 ("C-M-l" . org-demote-subtree)
 		 ("C-M-," . org-priority)
@@ -87,7 +94,8 @@
 		   ("C-c M-g" . slime-interrupt)
 		   ("C-c C-M-R" . slime-restart-inferior-lisp)
 		   ("C-c p" . slime-repl-set-package)
-		   ("C-c I" . slime-inspect))
+		   ("C-c I" . slime-inspect)
+		   ("M-<return>" . slime-eval-last-expression))
 	(slime-repl ("M-<return>" . slime-repl-return)
 				("<tab>" . indent-for-tab-command)
 				("M-I" . slime-repl-previous-input)
@@ -155,5 +163,14 @@
   (kill-minor-mode-maps-if-needed)
   (keys-extend-local-keymap keys-buffer-binding-sets)
   (message "Applied binding sets: ~a..." keys-buffer-binding-sets))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; utilities
+
+;; (defun keys|list-buffer-bindings ()
+;;   (interactive))
+
+
 
 (provide 'keys)
