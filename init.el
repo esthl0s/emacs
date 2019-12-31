@@ -233,25 +233,6 @@ _S_ hs-show-all   _s_ hs-show-block
 	((highlight-indent-guides)
 	 (setq highlight-indent-guides-responsive 'top)
 	 (setq highlight-indent-guides-method 'fill))
-	((hydra)
-	 (defhydra hydra-hydra ()
-	   "
-_e_ english
-_g_ magit
-_h_ hideshow
-_m_ markdown
-_o_ org
-_p_ paredit
-"
-	   ("e" hydra-english/body :exit t)
-	   ("g" magit-status :exit t)
-	   ("h" hydra-hideshow/body :exit t)
-	   ("m" hydra-markdown-mode/body :exit t)
-	   ("o" hydra-org/body :exit t)
-	   ("p" hydra-paredit/body :exit t))
-	 (do-for-hooks-in-list programming-modes-list
-						   (lambda ()
-							 (keys-extend-local-keymap '(hydra)))))
 	((hydra define-word ispell)
 	 (defhydra hydra-english (:foreign-keys run)
 	   "
@@ -608,3 +589,259 @@ _q_ quit
 				   (get-buffer "*init-install*"))
 			(error (princ (format "FAILURE.\n" p)
 						  (get-buffer "*init-install*")))))))))
+
+(require 'defconfig)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; defkeys
+
+(defkeys general
+  "M-a" execute-extended-command
+  "M-A" ansi-term
+  "M-s" (lambda () (interactive) (other-window -1))
+  "M-S" other-window
+  "M-d" delete-region
+  "M-f" delete-char
+  "M-F" occur
+  "M-g" kill-line
+  "M-h" beginning-of-line
+  "M-;" end-of-line
+  "C-M-h" beginning-of-buffer
+  "C-M-;" end-of-buffer
+  "M-i" previous-line
+  "M-j" backward-char
+  "M-k" next-line
+  "M-l" forward-char
+  "M-n" beginning-of-buffer
+  "M-N" end-of-buffer
+  "M-x" kill-region
+  "M-c" kill-ring-save
+  "M-v" yank
+  "C-b" switch-to-buffer)
+
+(defkeys ace-window
+  "M-w" ace-window)
+
+(defkeys cider
+  "M-<return>" cider-eval-last-sexp
+  "C-M-d" cider-doc)
+
+(defkeys cider-repl
+  "M-<return>" cider-repl-return)
+
+(defkeys dired
+  "M-i" dired-previous-line
+  "M-k" dired-next-line)
+
+(defkeys dired-subtree
+  "<tab>" dired-subtree-cycle)
+
+(defkeys hideshow-lisp
+  "<tab>" (lambda nil (interactive) (hs-toggle-hiding) (backward-char)))
+
+(defkeys hydra
+  "C-c h" hydra-hydra/body)
+
+(defkeys file
+  "C-x M-f" find-file-root
+  "C-x C-r" view-file)
+
+(defkeys org
+  "C-M-j" org-promote-subtree
+  "C-M-l" org-demote-subtree
+  "C-M-," org-priority
+  "C-M-n" org-narrow-to-subtree
+  "C-M-w" widen
+  "C-M-e" org-set-effort
+  "C-M-g" org-global-cycle
+  "C-M-k" org-metadown
+  "C-M-i" org-metaup
+  "C-M-S-l" org-store-link
+  "C-M-I" org-insert-link
+  "C-M-v" org-paste-subtree
+  "C-M-s" org-sort-entries
+  "C-M-X" org-cut-subtree
+  "C-M-t" org-todo)
+
+(defkeys paredit
+  "(" paredit-open-round
+  ")" paredit-close-round
+  "<backspace>" paredit-backward-delete
+  "<return>" paredit-newline
+  ";" paredit-semicolon
+  "\\" paredit-backslash
+  "[" paredit-open-square
+  "]" paredit-close-square
+  "\\" paredit-doublequote
+  "C-M-i" paredit-raise-sexp
+  "C-M-j" paredit-backward
+  "C-M-k" paredit-wrap-sexp
+  "C-M-l" paredit-forward
+  "M-u" paredit-backward-down
+  "C-M-u" paredit-backward-up
+  "M-o" paredit-forward-down
+  "C-M-o" paredit-forward-up
+  "C-." paredit-forward-slurp-sexp
+  "C-," paredit-backward-slurp-sexp
+  "M-," paredit-forward-barf-sexp
+  "M-." paredit-backward-barf-sexp
+  "C-M-;" paredit-comment-dwim
+  "M-/" paredit-split-sexp
+  "C-/" paredit-splice-sexp)
+
+(defkeys slime
+  "C-c i" slime-hyperspec-lookup
+  "C-c c" slime-complete-symbol
+  "C-c d" slime-edit-definition
+  "C-c D" slime-pop-find-definition-stack
+  "C-c m" slime-macroexpand-1
+  "C-c M" slime-macroexpand-all
+  "C-c M-d" slime-disassemble-symbol
+  "C-c M-g" slime-interrupt
+  "C-c C-M-R" slime-restart-inferior-lisp
+  "C-c p" slime-repl-set-package
+  "C-c I" slime-inspect
+  "M-<return>" slime-eval-last-expression)
+
+(defkeys slime-repl
+  "M-<return>" slime-repl-return
+  "<tab>" indent-for-tab-command
+  "M-I" slime-repl-previous-input
+  "M-K" slime-repl-next-input)
+
+(defkeys sexpr
+  "M-p" sexpr-fix-parens
+  "M-s" sexpr-edit-string-at-point)
+
+(defkeys undo-tree-mode
+  "M-z" undo
+  "M-Z" redo)
+
+(defkeys with-editor-mode
+  "C-c C-c" with-editor-finish
+  "C-c C-k" with-editor-cancel)
+
+(defkeys testkeys
+  "M-b" (lambda () (interactive) (message "hello world")))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; defconfigs
+
+(defconfig (emacs)
+  ;; look and feel
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (display-battery-mode -1)
+  (setq inhibit-splash-screen t)
+  (prefer-coding-system 'us-ascii)
+  (global-font-lock-mode 1)
+  (setq initial-scratch-message "")
+  (set-scroll-bar-mode 'nil)
+  (setq-default indent-tabs-mode t)
+  (setq indent-line-function 'insert-tab)
+  (setq electric-indent-mode 1)
+  (setq delete-selection-mode 1)
+  (setq sentence-end-double-space nil)
+  (setq tab-stop-list '(0 3))
+  (setq fill-column 80)
+  (setq-default tab-width 4)
+  (setq backup-by-copying t)
+  (setq read-quoted-char-radix 10)
+  (global-set-key (kbd "<C-S-M-right>") 'shrink-window-horizontally)
+  (global-set-key (kbd "<C-S-M-left>") 'enlarge-window-horizontally)
+  (global-set-key (kbd "<C-S-M-down>") 'shrink-window)
+  (global-set-key (kbd "<C-S-M-up>") 'enlarge-window)
+  (global-set-key (kbd "C-'") 'comment-or-uncomment-region)
+  (setq mail-host-address "esthlos.com")
+  (setq browse-url-browser-function 'browse-url-firefox)
+  ;; load paths
+  (add-to-list 'load-path
+			   (expand-file-name "lisp/"
+								 user-emacs-directory))
+  ;; load the theme
+  (setq custom-theme-directory
+		(expand-file-name "themes/"
+						  user-emacs-directory))
+  ;; set the backup directory
+  (setq backup-directory-alist
+		`(("." . ,(expand-file-name "saves"
+									user-emacs-directory))))
+  (setq default-directory "~/")
+  ;; easy add to hook set
+  (defun do-for-hooks-in-list (hook-list function)
+	(dolist (hook hook-list)
+	  (add-hook hook function)))
+  (defvar lisp-mode-hooks '(common-lisp-mode-hook
+							clojure-mode-hook
+							cider-repl-mode-hook
+							emacs-lisp-mode-hook
+							lisp-mode-hook
+							scheme-mode-hook
+							slime-repl-mode-hook))
+  (defvar programming-modes-list (append lisp-mode-hooks
+										 '(ada-mode-hook
+										   html-mode-hook
+										   java-mode-hook
+										   tex-mode-hook
+										   shell-script-mode-hook
+										   c-mode-hook
+										   python-mode-hook
+										   puppet-mode-hook
+										   text-mode-hook
+										   js-mode-hook
+										   css-mode-hook))))
+
+(setq programming-modes-list
+	  '(common-lisp-mode-hook
+		clojure-mode-hook
+		cider-repl-mode-hook
+		emacs-lisp-mode-hook
+		lisp-mode-hook
+		scheme-mode-hook
+		slime-repl-mode-hook
+		ada-mode-hook
+		html-mode-hook
+		java-mode-hook
+		tex-mode-hook
+		shell-script-mode-hook
+		c-mode-hook
+		python-mode-hook
+		puppet-mode-hook
+		text-mode-hook
+		js-mode-hook
+		css-mode-hook
+		))
+
+;; (defconfig (company foo bar)
+;;   (:hooks (programming-modes-list . (company-mode))
+;;		  (company-mode-hook . (setq company-idle-delay 0))
+;;		  (text-mode-hook . (print "hi" (current-buffer))))
+;;   (:keys (programming-modes-list . (general org))
+;;		 (company-mode-hook . (ace-window )))
+;;   (+ 1 1))
+
+(defconfig (hydra)
+  (:keys programming-modes-list (hydra))
+  (defhydra hydra-hydra ()
+	"
+_e_ english
+_g_ magit
+_h_ hideshow
+_m_ markdown
+_o_ org
+_p_ paredit
+"
+	("e" hydra-english/body :exit t)
+	("g" magit-status :exit t)
+	("h" hydra-hideshow/body :exit t)
+	("m" hydra-markdown-mode/body :exit t)
+	("o" hydra-org/body :exit t)
+	("p" hydra-paredit/body :exit t)))
+
+(defconfig (text-mode)
+  (:hooks text-mode-hook (lambda ()
+						   (setq fill-column 80)
+						   (hl-line-mode 1)
+						   (auto-fill-mode 1)))
+  (:keys text-mode-hook (org testkeys)))
