@@ -1,59 +1,103 @@
 (provide 'defconfig)
+(require 'seq)
+(require 'cl)
 
 (defvar defconfig|data
   `((:keymaps)
 	(:configs)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; define a config
+;; fundamental functions on configs
 
 (defun defconfig|generate-namespace (features)
   (intern (apply #'concat
 				 (mapcar #'symbol-name
 						 features))))
 
-(defun defconfig|lookup-config (namespace)
-  (car (seq-filter (lambda (c)
-					 (eq namespace
-						 (cdr (assoc :namespace c))))
-				   (cdr (assoc :configs defconfig|data)))))
+(defun defconfig|lookup-config (features)
+  (let* ((matches (seq-filter (lambda (c) (equal (cdr (assoc :features c))
+											  features))
+					   (cdr (assoc :configs defconfig|data)))))
+	  (if matches (car matches) nil)))
 
 (defun defconfig|run-code (c)
-  (dolist (code (cdr (assoc :code c)))
-	(eval code)))
+  (let ((code-value-list '()))
+	(dolist (code (cdr (assoc :code c)))
+	  (push (cons code (eval code))
+			code-value-list))
+	(setcdr (assoc :code-active c)
+			(reverse code-value-list))))
 
-(defun defconfig|enable-config (c)
-  (defconfig|enable-hooks c)
-  (defconfig|enable-keys c)
-  (defconfig|run-code c)
+(defun defconfig|read-config (feature-set args)
+  ;; using the backtick macro here gave paradoxical issues
+  ;; with defconfig effects "lingering" between evals.
+  (list (cons :features feature-set)
+		(cons :missing-features (defconfig|missing-features feature-set))
+		(cons :enabled '())
+		(cons :namespace (defconfig|generate-namespace feature-set))
+		(cons :hooks (cdr (assoc :hooks args)))
+		(cons :hooks-active '())
+		(cons :keys (cdr (assoc :keys args)))
+		(cons :keys-active '())
+		(cons :code (assq-delete-all :keys
+									 (assq-delete-all :hooks
+													  args)))
+		(cons :code-active '())))
+
+;; (defun defconfig|read-config (feature-set args)
+;;   `((:features . ,feature-set)
+;;	(:missing-features . ())
+;;	(:enabled . nil)
+;;	(:namespace . ,(defconfig|generate-namespace feature-set))
+;;	(:hooks . ,(cdr (assoc :hooks args)))
+;;	(:hooks-active . ())
+;;	(:keys . ,(cdr (assoc :keys args)))
+;;	(:keys-active . ())
+;;	(:code . ,(assq-delete-all :keys
+;;							   (assq-delete-all :hooks
+;;												args)))
+;;	(:code-active . ())))
+
+(defun defconfig|missing-features (feature-set)
+  (seq-filter (lambda (f) (condition-case nil
+							  (progn (require f) nil)
+							(error t)))
+			  feature-set))
+
+(defun defconfig|add-config (c)
   (push (cons (cdr (assoc :namespace c)) c)
 		(cdr (assoc :configs defconfig|data))))
 
-(defun defconfig|disable-config (c)
-  (defconfig|disable-hooks c)
-  (defconfig|disable-keys c)
+(defun defconfig|remove-config (c)
   (setcdr (assoc :configs defconfig|data)
 		  (assq-delete-all (cdr (assoc :namespace c))
 						   (cdr (assoc :configs defconfig|data)))))
 
-(defun defconfig|read-config (feature-set args)
-  `((:features . ,feature-set)
-	(:namespace . ,(defconfig|generate-namespace feature-set))
-	(:hooks . ,(cdr (assoc :hooks args)))
-	(:keys . ,(cdr (assoc :keys args)))
-	(:hooks-active . nil)
-	(:keys-active . nil)
-	(:code . ,(assq-delete-all :keys
-							   (assq-delete-all :hooks
-												(cdr args))))))
+(defun defconfig|enable-config (c)
+  (when (not (cdr (assoc :enabled c)))
+	(defconfig|run-code c)
+	(defconfig|enable-hooks c)
+	(defconfig|enable-keys c)
+	(setcdr (assoc :enabled c) t)))
+
+(defun defconfig|disable-config (c)
+  (when (cdr (assoc :enabled c))
+	(defconfig|disable-hooks c)
+	(defconfig|disable-keys c)
+	(setcdr (assoc :enabled c) nil)))
 
 (defmacro defconfig (feature-set &rest args)
   (let* ((new-config (defconfig|read-config feature-set args))
-		 (old-config (defconfig|lookup-config (cdr (assoc :namespace new-config)))))
-	(if old-config
-		(defconfig|disable-config old-config))
-	(defconfig|enable-config new-config)
-	"ok"))
+		 (old-config (defconfig|lookup-config feature-set)))
+	(when old-config
+	  (defconfig|disable-config old-config)
+	  (defconfig|remove-config old-config))
+	(defconfig|add-config new-config)
+	(if (not (cdr (assoc :missing-features new-config)))
+		(progn
+		  (defconfig|enable-config new-config)
+		  "enabled")
+	  "added")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; keys
@@ -151,7 +195,13 @@ hooks to functions.
 	(dotimes (i (/ (length hook-map) 2))
 	  (let* ((hook-symbol (nth (* i 2)
 							   hook-map))
-			 (hook-value (eval hook-symbol))
+			 (hook-value (cond
+						  ((listp hook-symbol) hook-symbol)
+						  ((symbolp hook-symbol)
+						   (progn (condition-case nil
+									  (symbol-value hook-symbol)
+									(error (set hook-symbol nil)))
+								  (eval hook-symbol)))))
 			 (hook-data (nth (+ 1 (* i 2))
 							 hook-map)))
 		;; the only way to "type" hooks is by their name...yuck
@@ -224,3 +274,25 @@ hooks to functions.
   (dolist (h (cdr (assoc :keys-active c)))
 	(remove-hook (cdr (assoc :hook-symbol h))
 				 (cdr (assoc :hook-name h)))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; helpful functions
+
+(defun defconfig|pp (c)
+  (let ((cc (defconfig|lookup-config c)))
+	(when cc
+	  (pp cc))))
+
+(defun defconfig|explain-disabled-configs ()
+  (mapcar (lambda (p)
+			(print (format "Config %s is missing features %s"
+						   (car p) (cdr p))))
+		  (mapcar (lambda (c) (cons (cdr (assoc :features c))
+									(cdr (assoc :missing-features c))))
+				  (seq-filter (lambda (c) (not (cdr (assoc :enabled c))))
+							  (cdr (assoc :configs defconfig|data))))))
+
+(defmacro defconfig|clear-data! ()
+  `(progn (setcdr (assoc :configs defconfig|data) nil)
+		  (setcdr (assoc :keymaps defconfig|data) nil)))
