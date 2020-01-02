@@ -628,9 +628,7 @@ _q_ quit
 		 slime-repl-mode-hook (slime-repl))
   (setq slime-lisp-implementations '((sbcl ("/usr/bin/sbcl"))
 									 (ccl ("/usr/bin/ccl")))
-		common-lisp-hyperspec-root "file:///home/ate/.clhs/"
-		;; TODO why is this here?
-		browse-url-firefox-program "firefox")
+		common-lisp-hyperspec-root "file:///home/ate/.clhs/")
   (mapcar (lambda (x) (add-to-list 'slime-contribs x))
 		  '(slime-autodoc
 			slime-repl
