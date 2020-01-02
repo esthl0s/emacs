@@ -661,7 +661,7 @@ _q_ quit
 	(interactive)
 	(if (term-in-line-mode)
 		(term-char-mode)
-	  ii	  (term-line-mode)))
+	  (term-line-mode)))
   (define-key term-mode-map (kbd "C-c C-t") 'term-toggle-mode)
   (define-key term-raw-map (kbd "C-c C-t") 'term-toggle-mode)
   (defadvice ansi-term (after advise-ansi-term-coding-system)
