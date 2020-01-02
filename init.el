@@ -709,7 +709,7 @@ _q_ quit
   (diminish 'undo-tree-mode))
 
 (defconfig (visual-regexp)
-  (global-set-key (kbd "C-M-s") vr/query-replace))
+  (global-set-key (kbd "C-M-s") (function vr/query-replace)))
 
 (defconfig (whitespace)
   (:hooks programming-modes-hooks (whitespace-mode))
