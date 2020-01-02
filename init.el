@@ -185,6 +185,9 @@
   (global-set-key (kbd "C-'") 'comment-or-uncomment-region)
   (setq mail-host-address "esthlos.com")
   (setq browse-url-browser-function 'browse-url-firefox)
+  ;; different operating systems
+  (cond
+   ((string-equal system-type "darwin") (setq mac-command-modifier 'meta)))
   ;; load paths
   (add-to-list 'load-path
 			   (expand-file-name "lisp/"
