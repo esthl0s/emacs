@@ -675,6 +675,7 @@ _q_ quit
   (setq tex-default-mode 'latex-mode))
 
 (defconfig (text-mode)
+  (:keys text-mode-hook (general))
   (:hooks text-mode-hook (progn (setq fill-column 80)
 								(hl-line-mode)
 								(auto-fill-mode))))
