@@ -187,7 +187,9 @@
   (setq browse-url-browser-function 'browse-url-firefox)
   ;; different operating systems
   (cond
-   ((string-equal system-type "darwin") (setq mac-command-modifier 'meta)))
+   ((string-equal system-type "darwin")
+	(setq mac-command-modifier 'meta
+		  browse-url-browser-function 'browse-url-chrome)))
   ;; load paths
   (add-to-list 'load-path
 			   (expand-file-name "lisp/"
