@@ -159,50 +159,44 @@
 
 (defconfig (emacs)
   (:keys programming-modes-hooks (general))
-  ;; look and feel
   (menu-bar-mode -1)
   (tool-bar-mode -1)
   (display-battery-mode -1)
-  (setq inhibit-splash-screen t)
-  (prefer-coding-system 'us-ascii)
   (global-font-lock-mode 1)
-  (setq initial-scratch-message "")
   (set-scroll-bar-mode 'nil)
-  (setq-default indent-tabs-mode t)
-  (setq indent-line-function 'insert-tab)
-  (setq electric-indent-mode 1)
-  (setq delete-selection-mode 1)
-  (setq sentence-end-double-space nil)
-  (setq tab-stop-list '(0 3))
-  (setq fill-column 80)
-  (setq-default tab-width 4)
-  (setq backup-by-copying t)
-  (setq read-quoted-char-radix 10)
+  (prefer-coding-system 'us-ascii)
+  (setq default-directory "~/"
+		inhibit-splash-screen t
+		initial-scratch-message ""
+		indent-line-function 'insert-tab
+		electric-indent-mode 1
+		delete-selection-mode 1
+		sentence-end-double-space nil
+		tab-stop-list '(0 3)
+		fill-column 80
+		backup-by-copying t
+		read-quoted-char-radix 10
+		mail-host-address "esthlos.com"
+		browse-url-browser-function 'browse-url-firefox
+		custom-theme-directory (expand-file-name "themes/"
+												 user-emacs-directory)
+		backup-directory-alist `(("." . ,(expand-file-name "saves"
+														   user-emacs-directory))))
+  (setq-default indent-tabs-mode t
+				tab-width 4)
+  (add-to-list 'load-path
+			   (expand-file-name "lisp/"
+								 user-emacs-directory))
   (global-set-key (kbd "<C-S-M-right>") 'shrink-window-horizontally)
   (global-set-key (kbd "<C-S-M-left>") 'enlarge-window-horizontally)
   (global-set-key (kbd "<C-S-M-down>") 'shrink-window)
   (global-set-key (kbd "<C-S-M-up>") 'enlarge-window)
   (global-set-key (kbd "C-'") 'comment-or-uncomment-region)
-  (setq mail-host-address "esthlos.com")
-  (setq browse-url-browser-function 'browse-url-firefox)
   ;; different operating systems
   (cond
    ((string-equal system-type "darwin")
 	(setq mac-command-modifier 'meta
 		  browse-url-browser-function 'browse-url-chrome)))
-  ;; load paths
-  (add-to-list 'load-path
-			   (expand-file-name "lisp/"
-								 user-emacs-directory))
-  ;; load the theme
-  (setq custom-theme-directory
-		(expand-file-name "themes/"
-						  user-emacs-directory))
-  ;; set the backup directory
-  (setq backup-directory-alist
-		`(("." . ,(expand-file-name "saves"
-									user-emacs-directory))))
-  (setq default-directory "~/")
   ;; easy add to hook set
   (defvar lisp-mode-hooks '(common-lisp-mode-hook
 							clojure-mode-hook
