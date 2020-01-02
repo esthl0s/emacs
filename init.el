@@ -456,8 +456,8 @@ _b_ ispell-buffer
   (:hooks lisp-mode-hook (progn (font-lock-mode)
 								(show-paren-mode))))
 
-(defconfig (magit keys)
-  (:keys magit-mode-hook (magit)))
+(defconfig (magit)
+  (:keys magit-mode-hook (general)))
 
 (defconfig (magit hydra)
   (:keys magit-mode-hook (hydra)))
