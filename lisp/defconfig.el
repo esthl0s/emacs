@@ -293,6 +293,17 @@ hooks to functions.
 				  (seq-filter (lambda (c) (not (cdr (assoc :enabled c))))
 							  (cdr (assoc :configs defconfig|data))))))
 
+(defun defconfig|list-needed-packages ()
+  (remove-duplicates (apply (function append) (mapcar (lambda (c) (cdr (assoc :missing-features c)))
+				  (seq-filter (lambda (c) (not (cdr (assoc :enabled c))))
+							  (cdr (assoc :configs defconfig|data)))))))
+
+;; (dolist (p (defconfig|list-needed-packages))
+;;   (condition-case
+;;	  nil
+;;	  (package-install p)
+;;	(error (print (format "Failed installing %s" p)))))
+
 (defmacro defconfig|clear-data! ()
   `(progn (setcdr (assoc :configs defconfig|data) nil)
 		  (setcdr (assoc :keymaps defconfig|data) nil)))
