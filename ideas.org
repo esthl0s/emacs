@@ -1,0 +1,9 @@
+* macro for diminishing in a defconfig
+* macro for hydras
+* generate graph of configs (?)
+* remove sexpr mode
+* fix redo
+* way of assigning global keys
+* way of assigning key in specific map
+* get better system for kill ring
+* profiles for different machines
