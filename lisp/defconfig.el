@@ -284,19 +284,43 @@ hooks to functions.
 	(when cc
 	  (pp cc))))
 
+(defun defconfig|pprint-alist (alist &optional key-title val-title)
+  (let ((key-title-str (if key-title key-title ""))
+		(val-title-str (if val-title val-title "")))
+	(flet ((to-literals
+			(list)
+			(mapcar (lambda (c) (format "%s" c)) list))
+		   (max-length
+			(list)
+			(apply #'max (mapcar #'length list))))
+	  (let* ((key-max-len (max-length (cons key-title-str (to-literals (mapcar #'car alist)))))
+			 (val-max-len (max-length (cons val-title-str (to-literals (mapcar #'cdr alist)))))
+			 (key-format-str (format "%%%ds" key-max-len))
+			 (val-format-str (format "%%-%ds" val-max-len))
+			 (format-str (format "%s -> %s\n" key-format-str val-format-str))
+			 (strings (mapcar (lambda (a) (format format-str (car a) (cdr a)))
+							  alist)))
+		(when (and key-title val-title)
+		  (push "\n" strings)
+		  (push (format format-str (upcase key-title) (upcase val-title)) strings))
+		(apply #'concat strings)))))
+
 (defun defconfig|explain-disabled-configs ()
-  (mapcar (lambda (p)
-			(print (format "Config %s is missing features %s"
-						   (car p) (cdr p))))
-		  (mapcar (lambda (c) (cons (cdr (assoc :features c))
-									(cdr (assoc :missing-features c))))
-				  (seq-filter (lambda (c) (not (cdr (assoc :enabled c))))
-							  (cdr (assoc :configs defconfig|data))))))
+  (interactive)
+  (let* ((new-buffer (generate-new-buffer "defconfig|disabled-configs"))
+		 (disabled-configs (seq-filter (lambda (c) (not (cdr (assoc :enabled c))))
+									   (cdr (assoc :configs defconfig|data))))
+		 (missing-feature-alist (mapcar (lambda (c) (cons (cdr (assoc :features c))
+														  (cdr (assoc :missing-features c))))
+										disabled-configs)))
+	(display-message-or-buffer
+	 (defconfig|pprint-alist missing-feature-alist
+	   "config" "missing features"))))
 
 (defun defconfig|list-needed-packages ()
   (remove-duplicates (apply (function append) (mapcar (lambda (c) (cdr (assoc :missing-features c)))
-				  (seq-filter (lambda (c) (not (cdr (assoc :enabled c))))
-							  (cdr (assoc :configs defconfig|data)))))))
+													  (seq-filter (lambda (c) (not (cdr (assoc :enabled c))))
+																  (cdr (assoc :configs defconfig|data)))))))
 
 ;; (dolist (p (defconfig|list-needed-packages))
 ;;   (condition-case

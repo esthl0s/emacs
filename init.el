@@ -299,6 +299,17 @@
 
 (defconfig (define-word))
 
+(defconfig (defconfig hydra)
+  (defhydra hydra-defconfig (:foreign-keys run)
+	"
+^Command^
+^^^^^^^----------------------
+_E_ explain-disabled-configs
+_q_ quit
+"
+	("E" defconfig|explain-disabled-configs)
+	("q" nil "quit" :exit t)))
+
 (defconfig (dired)
   (:keys dired-mode-hook (dired))
   (:hooks dired-mode-hook (dired-hide-details-mode 1))
@@ -407,6 +418,7 @@ _S_ hs-show-all   _s_ hs-show-block
   (:keys programming-modes-hooks (hydra))
   (defhydra hydra-hydra ()
 	"
+_d_ defconfig
 _e_ english
 _g_ magit
 _h_ hideshow
@@ -414,6 +426,7 @@ _m_ markdown
 _o_ org
 _p_ paredit
 "
+	("d" hydra-defconfig/body :exit t)
 	("e" hydra-english/body :exit t)
 	("g" magit-status :exit t)
 	("h" hydra-hideshow/body :exit t)
