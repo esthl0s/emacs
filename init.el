@@ -371,7 +371,7 @@ _q_ quit
   (add-to-list 'default-frame-alist
 			   `(font . ,myfont))
   (set-default-font myfont)
-  (load-theme 'ate-light t))
+  (load-theme 'ate t))
 
 (defconfig (geiser))
 
