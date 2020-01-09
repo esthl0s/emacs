@@ -24,15 +24,21 @@
   "M-j" backward-char
   "M-k" next-line
   "M-l" forward-char
-  "M-n" beginning-of-buffer
-  "M-N" end-of-buffer
+  "M-u" scroll-down-command
+  "M-m" scroll-up-command
+  "M-U" beginning-of-buffer
+  "M-M" end-of-buffer
   "M-x" kill-region
   "M-c" kill-ring-save
   "M-v" yank
   "C-b" switch-to-buffer)
 
+(defkeys eshell
+  "<return>" newline
+  "M-<return>" eshell-send-input)
+
 (defkeys ace-jump
-  "C-c SPC" ace-jump-mode)
+  "M-SPC" ace-jump-mode)
 
 (defkeys ace-window
   "M-w" ace-window)
@@ -63,6 +69,17 @@
 (defkeys file
   "C-x M-f" find-file-root
   "C-x C-r" view-file)
+
+(defkeys ivy
+  "M-i" ivy-previous-line
+  "M-j" backward-char
+  "M-k" ivy-next-line
+  "M-l" forward-char
+  "M-u" ivy-scroll-down-command
+  "M-m" ivy-scroll-up-command
+  "M-U" ivy-beginning-of-buffer
+  "M-M" ivy-end-of-buffer
+  "M-v" yank)
 
 (defkeys org
   "C-M-j" org-promote-subtree
@@ -158,7 +175,7 @@
   "M-b" (lambda () (interactive) (message "hello world")))
 
 (defconfig (emacs)
-  (:keys programming-modes-hooks (general))
+  (:keys general-modes-hooks (general))
   (menu-bar-mode -1)
   (tool-bar-mode -1)
   (display-battery-mode -1)
@@ -184,9 +201,6 @@
 														   user-emacs-directory))))
   (setq-default indent-tabs-mode t
 				tab-width 4)
-  (add-to-list 'load-path
-			   (expand-file-name "lisp/"
-								 user-emacs-directory))
   (global-set-key (kbd "<C-S-M-right>") 'shrink-window-horizontally)
   (global-set-key (kbd "<C-S-M-left>") 'enlarge-window-horizontally)
   (global-set-key (kbd "<C-S-M-down>") 'shrink-window)
@@ -214,9 +228,11 @@
 											c-mode-hook
 											python-mode-hook
 											puppet-mode-hook
-											text-mode-hook
 											js-mode-hook
-											css-mode-hook))))
+											css-mode-hook
+											conf-mode-hook)))
+  (defvar general-modes-hooks (append programming-modes-hooks
+									  '(text-mode-hook))))
 
 (defconfig (package)
   (package-initialize)
@@ -229,10 +245,10 @@
   )
 
 (defconfig (ace-jump-mode)
-  (:keys programming-modes-hooks (ace-jump)))
+  (:keys general-modes-hooks (ace-jump)))
 
 (defconfig (ace-window)
-  (:keys programming-modes-hooks (ace-window)))
+  (:keys general-modes-hooks (ace-window)))
 
 (defconfig (ada-mode)
   (mapcar (lambda (x) (add-to-list 'auto-mode-alist (cons x 'ada-mode)))
@@ -288,6 +304,9 @@
 (defconfig (counsel ivy diminish)
   (diminish 'counsel-mode))
 
+(defconfig (csv-mode)
+  (:keys csv-mode-hook (general)))
+
 (defconfig (custom)
   (setq custom-theme-directory
 		(expand-file-name "themes/"
@@ -319,7 +338,7 @@ _q_ quit
 (defconfig (dired hydra)
   (:keys dired-mode-hook (hydra)))
 
-(defconfig (dired-subtree )
+(defconfig (dired dired-subtree)
   (:keys dired-mode-hook (dired-subtree)))
 
 (defconfig (dockerfile-mode)
@@ -348,9 +367,37 @@ _q_ quit
 (defconfig (eshell)
   (:hooks eshell-mode-hook (set-buffer-process-coding-system 'utf-8-unix
 															 'utf-8-unix))
+  (:keys eshell-mode-hook (ace-jump ace-window general eshell hydra swiper))
   (defun eshell-new ()
 	(interactive)
-	(eshell 'N)))
+	(eshell 'N))
+  (defun eshell|with-face (str &rest face-plist)
+	(propertize str 'face face-plist))
+  (defun ate-eshell-prompt ()
+	(concat
+	 (eshell|with-face (eshell/pwd) :foreground "green")
+	 " "
+	 (eshell|with-face "λ" :foreground "magenta")
+	 " "))
+  (setq eshell-prompt-regexp "^[^#$λ
+]* [#$λ] ")
+  (setq eshell-prompt-function 'ate-eshell-prompt)
+  ;; (defun ate-eshell-prompt-long ()
+  ;;	(let ((header-bg "grey23"))
+  ;;	  (concat
+  ;;	   (eshell|with-face (concat (eshell/pwd) " ")
+  ;;						 :background header-bg)
+  ;;	   (eshell|with-face (format-time-string "(%Y-%m-%d %H:%M) " (current-time))
+  ;;						 :background header-bg :foreground "#888")
+  ;;	   (eshell|with-face "\n" :background header-bg)
+  ;;	   (eshell|with-face (eshell/whoami) :foreground "green")
+  ;;	   "@"
+  ;;	   (eshell|with-face (eshell/) "localhost" :foreground "purple")
+  ;;	   (if (= (user-uid) 0)
+  ;;		   (eshell|with-face " #" :foreground "red")
+  ;;		 (eshell|with-face " λ" :foreground "green"))
+  ;;	   " ")))
+  )
 
 (defconfig (exec-path-from-shell)
   (when (memq window-system '(mac ns x))
@@ -415,7 +462,7 @@ _S_ hs-show-all   _s_ hs-show-block
   (setq highlight-indent-guides-method 'fill))
 
 (defconfig (hydra)
-  (:keys programming-modes-hooks (hydra))
+  (:keys general-modes-hooks (hydra))
   (defhydra hydra-hydra ()
 	"
 _d_ defconfig
@@ -456,6 +503,7 @@ _b_ ispell-buffer
 			   "/usr/local/bin/aspell"))))
 
 (defconfig (ivy)
+  (:keys ivy-mode-hook (general))
   (ivy-mode))
 
 (defconfig (ivy diminish)
@@ -684,7 +732,6 @@ _q_ quit
   (setq tex-default-mode 'latex-mode))
 
 (defconfig (text-mode)
-  (:keys text-mode-hook (general))
   (:hooks text-mode-hook (progn (setq fill-column 80)
 								(hl-line-mode)
 								(auto-fill-mode))))
@@ -703,14 +750,7 @@ _q_ quit
 (defconfig (tramp-term))
 
 (defconfig (undo-tree)
-  (:hooks programming-modes-hooks (undo-tree-mode 1))
-  (:keys undo-tree-mode-hook (undo-tree-mode)))
-
-(defconfig (undo-tree diminish)
-  (diminish 'undo-tree-mode))
-
-(defconfig (undo-tree)
-  (:hooks programming-modes-hooks (undo-tree-mode 1))
+  (:hooks general-modes-hooks (undo-tree-mode 1))
   (:keys undo-tree-mode-hook (undo-tree-mode)))
 
 (defconfig (undo-tree diminish)

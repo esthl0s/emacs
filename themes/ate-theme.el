@@ -21,8 +21,7 @@
  (bold-italic
   :weight bold
   :slant italic)
-;;; paren
- (show-paren-match :background "grey23")
+ (fixed-pitch :inherit default)
 ;;; Info
  (Info-quoted)
  (dired-directory :foreground "magenta")
@@ -121,7 +120,12 @@
  (rainbow-delimiters-depth-6-face :inherit outline-2)
  (rainbow-delimiters-depth-7-face :inherit outline-5)
  (rainbow-delimiters-depth-8-face :inherit outline-1)
- (rainbow-delimiters-depth-9-face :inherit outline-4))
+ (rainbow-delimiters-depth-9-face :inherit outline-4)
+;;; eshell
+ (eshell-prompt :foreground "green")
+ (eshell-ls-directory :foreground "purple")
+;;; markdown
+ (markdown-code-face :background "grey15"))
 
 (provide-theme 'ate)
 
