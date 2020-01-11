@@ -182,6 +182,9 @@
   (global-font-lock-mode 1)
   (set-scroll-bar-mode 'nil)
   (prefer-coding-system 'us-ascii)
+  (defvar lisp-mode-hooks)
+  (defvar programming-modes-hooks)
+  (defvar general-modes-hooks)
   (setq default-directory "~/"
 		inhibit-splash-screen t
 		initial-scratch-message ""
@@ -198,7 +201,30 @@
 		custom-theme-directory (expand-file-name "themes/"
 												 user-emacs-directory)
 		backup-directory-alist `(("." . ,(expand-file-name "saves"
-														   user-emacs-directory))))
+														   user-emacs-directory)))
+		lisp-mode-hooks '(common-lisp-mode-hook
+						  clojure-mode-hook
+						  cider-repl-mode-hook
+						  emacs-lisp-mode-hook
+						  lisp-mode-hook
+						  scheme-mode-hook
+						  slime-repl-mode-hook)
+		programming-modes-hooks (append lisp-mode-hooks
+										'(ada-mode-hook
+										  html-mode-hook
+										  java-mode-hook
+										  tex-mode-hook
+										  shell-script-mode-hook
+										  c-mode-hook
+										  python-mode-hook
+										  puppet-mode-hook
+										  js-mode-hook
+										  css-mode-hook
+										  conf-mode-hook))
+		general-modes-hooks (append programming-modes-hooks
+									'(text-mode-hook
+									  Info-mode-hook
+									  help-mode-hook)))
   (setq-default indent-tabs-mode t
 				tab-width 4)
   (global-set-key (kbd "<C-S-M-right>") 'shrink-window-horizontally)
@@ -210,29 +236,7 @@
   (cond
    ((string-equal system-type "darwin")
 	(setq mac-command-modifier 'meta
-		  browse-url-browser-function 'browse-url-chrome)))
-  ;; easy add to hook set
-  (defvar lisp-mode-hooks '(common-lisp-mode-hook
-							clojure-mode-hook
-							cider-repl-mode-hook
-							emacs-lisp-mode-hook
-							lisp-mode-hook
-							scheme-mode-hook
-							slime-repl-mode-hook))
-  (defvar programming-modes-hooks (append lisp-mode-hooks
-										  '(ada-mode-hook
-											html-mode-hook
-											java-mode-hook
-											tex-mode-hook
-											shell-script-mode-hook
-											c-mode-hook
-											python-mode-hook
-											puppet-mode-hook
-											js-mode-hook
-											css-mode-hook
-											conf-mode-hook)))
-  (defvar general-modes-hooks (append programming-modes-hooks
-									  '(text-mode-hook))))
+		  browse-url-browser-function 'browse-url-chrome))))
 
 (defconfig (package)
   (package-initialize)
@@ -243,6 +247,10 @@
   ;;				  (cons "melpa" "http://melpa.org/packages/")
   ;;				  t)
   )
+
+(defconfig (minibuffer)
+  (:keys minibuffer-inactive-mode-hook (general)
+		 minibuffer-setup-hook (general)))
 
 (defconfig (ace-jump-mode)
   (:keys general-modes-hooks (ace-jump)))
@@ -703,8 +711,8 @@ _q_ quit
   (smart-tabs-insinuate 'c 'python 'tex))
 
 ;; TODO fix
-;; (defconfig (swiper ivy keys)
-;;	(:keys global-map (swiper)))
+(defconfig (swiper ivy)
+  (global-set-key (kbd "C-s") 'swiper))
 
 (defconfig (tabulated-list)
   (:keys tabulated-list-mode-hook (general)))
