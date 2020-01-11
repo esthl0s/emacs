@@ -24,9 +24,9 @@
   "M-j" backward-char
   "M-k" next-line
   "M-l" forward-char
-  "M-u" scroll-down-command
+  "M-n" scroll-down-command
   "M-m" scroll-up-command
-  "M-U" beginning-of-buffer
+  "M-N" beginning-of-buffer
   "M-M" end-of-buffer
   "M-x" kill-region
   "M-c" kill-ring-save
@@ -113,9 +113,11 @@
   "C-M-k" paredit-wrap-sexp
   "C-M-l" paredit-forward
   "M-u" paredit-backward-down
-  "C-M-u" paredit-backward-up
+  "M-U" paredit-backward-up
+  "C-M-u" paredit-backward-up-all
   "M-o" paredit-forward-down
-  "C-M-o" paredit-forward-up
+  "M-O" paredit-forward-up
+  "C-M-o" paredit-forward-up-all
   "C-." paredit-forward-slurp-sexp
   "C-," paredit-backward-slurp-sexp
   "M-," paredit-forward-barf-sexp
@@ -224,7 +226,8 @@
 		general-modes-hooks (append programming-modes-hooks
 									'(text-mode-hook
 									  Info-mode-hook
-									  help-mode-hook)))
+									  help-mode-hook
+									  apropos-mode-hook)))
   (setq-default indent-tabs-mode t
 				tab-width 4)
   (global-set-key (kbd "<C-S-M-right>") 'shrink-window-horizontally)
@@ -595,7 +598,13 @@ _q_ quit
   (diminish page-break-lines-mode))
 
 (defconfig (paredit)
-  (:keys lisp-mode-hooks (paredit)))
+  (:keys lisp-mode-hooks (paredit))
+  (defun paredit-forward-up-all ()
+	(interactive)
+	(paredit-forward-up 64))
+  (defun paredit-backward-up-all ()
+	(interactive)
+	(paredit-backward-up 64)))
 
 (defconfig (paredit diminish)
   (diminish 'paredit-mode))
