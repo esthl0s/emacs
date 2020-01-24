@@ -1,4 +1,3 @@
-(provide 'defconfig)
 (require 'seq)
 (require 'cl)
 
@@ -10,15 +9,16 @@
 ;; fundamental functions on configs
 
 (defun defconfig|generate-namespace (features)
-  (intern (apply #'concat
-				 (mapcar #'symbol-name
-						 features))))
+  (intern (mapconcat 'identity
+					 (mapcar #'symbol-name
+							 features)
+					 "_")))
 
 (defun defconfig|lookup-config (features)
   (let* ((matches (seq-filter (lambda (c) (equal (cdr (assoc :features c))
-											  features))
-					   (cdr (assoc :configs defconfig|data)))))
-	  (if matches (car matches) nil)))
+												 features))
+							  (cdr (assoc :configs defconfig|data)))))
+	(if matches (car matches) nil)))
 
 (defun defconfig|run-code (c)
   (let ((code-value-list '()))
@@ -277,6 +277,34 @@ hooks to functions.
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; profiles
+
+;; (defun defconfig|read-profile (name packages)
+;;   (list (cons :name name)
+;;		(cons :packages packages)
+;;		(cons :enabled nil)))
+
+;; (defun defconfig|add-profile (p)
+;;   (push (cons (cdr (assoc :name p)) p)
+;;		(cdr (assoc :profiles defconfig|data))))
+
+;; (defun defconfig|remove-profile (p)
+;;   (setcdr (assoc :profiles defconfig|data)
+;;		  (assq-delete-all (cdr (assoc :name p))
+;;						   (cdr (assoc :profiles defconfig|data)))))
+
+;; (defun defconfig|enable-profile (p))
+
+;; (defun defconfig|disable-profile (p))
+
+;; (defun defconfig|lookup-profile (name)
+;;   (assoc name (cdr (assoc :profiles defconfig|data))))
+
+;; (defmacro defprofile (name &rest args)
+;;   (let ((new-profile (defconfig|read-profile name args))
+;;		(old-profile (defconfig|lookup-profile name)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; helpful functions
 
 (defun defconfig|pp (c)
@@ -322,6 +350,27 @@ hooks to functions.
 													  (seq-filter (lambda (c) (not (cdr (assoc :enabled c))))
 																  (cdr (assoc :configs defconfig|data)))))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; inspection
+
+(defun defconfig|select-config ()
+  (let ((r (completing-read "Select a config: "
+							(sort (mapcar (lambda (c) (cdr (assoc :namespace c)))
+										  (cdr (assoc :configs defconfig|data)))
+								  #'string-lessp))))
+	(cdr (assoc (intern r) (cdr (assoc :configs defconfig|data))))))
+
+(defun defconfig|describe-config ()
+  (interactive)
+  (let* ((c (defconfig|select-config))
+		 (n (concat "defconfig|"
+					(symbol-name (cdr (assoc :namespace c))))))
+	(with-output-to-temp-buffer n
+	  (pp c))
+	(with-current-buffer n
+	  (emacs-lisp-mode)
+	  (read-only-mode))))
+
 ;; (dolist (p (defconfig|list-needed-packages))
 ;;   (condition-case
 ;;	  nil
@@ -331,3 +380,13 @@ hooks to functions.
 (defmacro defconfig|clear-data! ()
   `(progn (setcdr (assoc :configs defconfig|data) nil)
 		  (setcdr (assoc :keymaps defconfig|data) nil)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; initialization
+
+(when (every (lambda (x) (not (cdr x)))
+			 defconfig|data)
+  (load "keys.el")
+  (load "configs.el"))
+
+(provide 'defconfig)

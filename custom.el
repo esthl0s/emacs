@@ -11,7 +11,7 @@
  '(org-agenda-files (quote ("~/org/refile.org" "~/org/ate.org")))
  '(package-selected-packages
    (quote
-	(csv-mode highlight-indent-guides dockerfile-mode yaml-mode htmlize define-word calfw calfw-org org-super-agenda proof-general company-coq company with-editor cider-repl tramp-term undo-tree sr-speedbar smart-tabs-mode slime s rainbow-delimiters paredit page-break-lines markdown-mode magit hydra geiser fill-column-indicator dired-subtree diminish dictionary cider aggressive-indent ace-window)))
+	(password-generator csv-mode highlight-indent-guides dockerfile-mode yaml-mode htmlize define-word calfw calfw-org org-super-agenda proof-general company-coq company with-editor cider-repl undo-tree sr-speedbar smart-tabs-mode slime s rainbow-delimiters paredit page-break-lines markdown-mode magit hydra geiser fill-column-indicator dired-subtree diminish dictionary cider aggressive-indent ace-window)))
  '(show-paren-mode t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
