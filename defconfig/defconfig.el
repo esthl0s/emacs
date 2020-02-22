@@ -388,6 +388,16 @@ hooks to functions.
 		  (setcdr (assoc :keymaps defconfig|data) nil)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; api
+
+(defmacro defconfig|get-config (config-name-list)
+  `(assoc (defconfig|generate-namespace ',config-name-list)
+		  (cdr (assoc :configs defconfig|data))))
+
+(defmacro defconfig|get-config-field (field config)
+  `(cdr (assoc ,field (cdr (defconfig|get-config ,config)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; initialization
 
 (when (every (lambda (x) (not (cdr x)))
