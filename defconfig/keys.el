@@ -25,8 +25,8 @@
   "C-b" switch-to-buffer)
 
 (defkeys eshell
-  "<return>" newline
-  "M-<return>" eshell-send-input)
+  "<return>" eshell-send-input
+  "M-<return>" newline)
 
 (defkeys ace-jump
   "M-SPC" ace-jump-mode)
