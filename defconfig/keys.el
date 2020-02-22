@@ -35,8 +35,10 @@
   "M-w" ace-window)
 
 (defkeys cider
-  "M-<return>" cider-eval-last-sexp
-  "C-M-d" cider-doc)
+  "M-<return>" cider-eval-last-sexp)
+
+(defkeys cider-hydra
+  "C-c p" hydra-cider/body)
 
 (defkeys cider-repl
   "M-<return>" cider-repl-return)

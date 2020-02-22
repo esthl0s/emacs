@@ -130,6 +130,18 @@
   ;; to remove the terrible huge map in overtone
   (setq cider-print-fn nil))
 
+(defconfig (cider hydra)
+  (:keys cider-mode-hook (cider-hydra))
+  (defhydra hydra-cider (:foreign-keys run)
+	"
+^Command^
+^^^^^^^----------------------
+_d_ cider-doc
+_q_ quit
+"
+	("d" cider-doc)
+	("q" nil "quit" :exit t)))
+
 (defconfig (cider-repl)
   (:keys cider-repl-mode-hook (cider-repl))
   (setq cider-repl-display-help-banner nil))
