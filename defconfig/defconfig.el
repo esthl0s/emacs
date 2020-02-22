@@ -192,37 +192,91 @@
 ;;				  ,(cons :hook-data (cdr h))) expanded-hooks))))
 ;;	(reverse expanded-hooks)))
 
+
+
 (defun defconfig|expand-hook-map (hook-map)
   "
 Takes in the hooks from a configuration, and returns an alist of
 hooks to functions.
+
+The input hook-map is a list of even length containing pairs of
+hook-id and hook-data.
+
+hook-id must be one of the following form:
+1. A symbol ending in \"hook\".
+2. A list of symbols ending in \"hook\".
+3. A symbol not ending in \"hook\" which is bound to a list as in 2.
+
+hook-data must be a list of keyset designator symbols.
 "
   (let ((expanded-hooks '()))
 	(dotimes (i (/ (length hook-map) 2))
-	  (let* ((hook-symbol (nth (* i 2)
-							   hook-map))
-			 (hook-value (cond
-						  ((listp hook-symbol) hook-symbol)
-						  ((symbolp hook-symbol)
-						   (progn (condition-case nil
-									  (symbol-value hook-symbol)
-									(error (set hook-symbol nil)))
-								  (eval hook-symbol)))))
+	  (let* ((hook-id (nth (* i 2)
+						   hook-map))
 			 (hook-data (nth (+ 1 (* i 2))
 							 hook-map)))
-		;; the only way to "type" hooks is by their name...yuck
-		(if (and (listp hook-value)
-				 (every #'symbolp hook-value)
-				 (every (lambda (x) (string-match-p "hook$" (symbol-name x)))
-						hook-value))
-			(dolist (g hook-value)
-			  (push `(,(cons :hook-symbol g)
-					  ,(cons :hook-data hook-data))
-					expanded-hooks))
-		  (push `(,(cons :hook-symbol hook-symbol)
+		(cond
+		 ((and (symbolp hook-id)
+			   (boundp hook-id)
+			   (not (string-match-p "hook$" (symbol-name hook-id))))
+		  (let ((hook-value (eval hook-id)))
+			(if (and (listp hook-value)
+					 (every #'symbolp hook-value)
+					 (every (lambda (x) (string-match-p "hook$" (symbol-name x)))
+							hook-value))
+				(dolist (g hook-value)
+				  (push `(,(cons :hook-symbol g)
+						  ,(cons :hook-data hook-data))
+						expanded-hooks))
+			  (error (format "Key declaration contains error: %s" hook-id)))))
+		 ((and (symbolp hook-id)
+			   (string-match-p "hook$" (symbol-name hook-id)))
+		  (push `(,(cons :hook-symbol hook-id)
 				  ,(cons :hook-data hook-data))
-				expanded-hooks))))
+				expanded-hooks))
+		 ((listp hook-id)
+		  (if (and (listp hook-id)
+				   (every #'symbolp hook-id)
+				   (every (lambda (x) (string-match-p "hook$" (symbol-name x)))
+						  hook-id))
+			  (dolist (g hook-id)
+				(push `(,(cons :hook-symbol g)
+						,(cons :hook-data hook-data))
+					  expanded-hooks))
+			(error (format "Key declaration contains error: %s" hook-id)))))))
 	(reverse expanded-hooks)))
+
+;; (defun defconfig|expand-hook-map (hook-map)
+;;   "
+;; Takes in the hooks from a configuration, and returns an alist of
+;; hooks to functions.
+;; "
+;;   (let ((expanded-hooks '()))
+;;	(dotimes (i (/ (length hook-map) 2))
+;;	  (let* ((hook-symbol (nth (* i 2)
+;;							   hook-map))
+;;			 (hook-value (cond
+;;						  ((listp hook-symbol) hook-symbol)
+;;						  ((symbolp hook-symbol)
+;;						   (progn (condition-case nil
+;;									  (symbol-value hook-symbol)
+;;									(error (set hook-symbol nil)))
+;;								  (eval hook-symbol)))))
+;;			 (hook-data (nth (+ 1 (* i 2))
+;;							 hook-map)))
+;;		;; the only way to "type" hooks is by their name...yuck
+;;		(if (and (listp hook-value)
+;;				 (every #'symbolp hook-value)
+;;				 (every (lambda (x) (string-match-p "hook$" (symbol-name x)))
+;;						hook-value))
+;;			(dolist (g hook-value)
+;;			  (push `(,(cons :hook-symbol g)
+;;					  ,(cons :hook-data hook-data))
+;;					expanded-hooks))
+;;		  (push `(,(cons :hook-symbol hook-symbol)
+;;				  ,(cons :hook-data hook-data))
+;;				expanded-hooks))))
+;;	(reverse expanded-hooks)))
 
 (defun defconfig|inject-hook-names (expanded-hook-map namespace key)
   (dotimes (i (length expanded-hook-map))
@@ -395,7 +449,7 @@ hooks to functions.
 		  (cdr (assoc :configs defconfig|data))))
 
 (defmacro defconfig|get-config-field (field config)
-  `(cdr (assoc ,field (cdr (defconfig|get-config ,config)))))
+  `(cdr (assoc field (cdr (defconfig|get-config ,config)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; initialization
