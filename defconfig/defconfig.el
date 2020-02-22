@@ -64,20 +64,6 @@
 													  args)))
 		(cons :code-active '())))
 
-;; (defun defconfig|read-config (feature-set args)
-;;   `((:features . ,feature-set)
-;;	(:missing-features . ())
-;;	(:enabled . nil)
-;;	(:namespace . ,(defconfig|generate-namespace feature-set))
-;;	(:hooks . ,(cdr (assoc :hooks args)))
-;;	(:hooks-active . ())
-;;	(:keys . ,(cdr (assoc :keys args)))
-;;	(:keys-active . ())
-;;	(:code . ,(assq-delete-all :keys
-;;							   (assq-delete-all :hooks
-;;												args)))
-;;	(:code-active . ())))
-
 (defun defconfig|missing-features (feature-set)
   (seq-filter (lambda (f) (condition-case nil
 							  (progn (require f) nil)
