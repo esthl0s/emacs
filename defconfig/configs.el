@@ -53,7 +53,9 @@
 									'(text-mode-hook
 									  Info-mode-hook
 									  help-mode-hook
-									  apropos-mode-hook)))
+									  apropos-mode-hook
+									  Man-mode-hook
+									  diff-mode-hook)))
   (setq-default indent-tabs-mode t
 				tab-width 4)
   (global-set-key (kbd "<C-S-M-right>") 'shrink-window-horizontally)
