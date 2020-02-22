@@ -6,6 +6,26 @@
 	(:configs)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; experimental, ignore for now
+
+(defvar defconfig|operations
+  '((:name)
+	(:read)
+	(:lookup)
+	(:add)
+	(:remove)
+	(:enable)
+	(:disable)))
+
+(defun defconfig|store-operation (operation type function)
+  (let ((operation-place (assoc operation defconfig|operations)))
+	(when (assoc type (cdr operation-place))
+	  (setcdr op-place
+			  (assq-delete-all type (cdr operation-place))))
+	(push (cons type function)
+		  (cdr operation-place))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; fundamental functions on configs
 
 (defun defconfig|generate-namespace (features)
