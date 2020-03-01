@@ -5,6 +5,14 @@
   `((:keymaps)
 	(:configs)))
 
+(defvar defconfig|local-buffer-keymaps)
+(make-variable-buffer-local 'defconfig|local-buffer-keymaps)
+
+;;(deflocal defconfig|local-buffer-configs)
+;; actually, adding a function which hooks into
+;; a mode and loads configs for the mode/buffer
+;; might be the right way to go. Think about it.
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; experimental, ignore for now
 
