@@ -78,6 +78,7 @@
   "M-v" yank)
 
 (defkeys org
+  "C-M-a" org-archive-subtree
   "C-M-j" org-promote-subtree
   "C-M-l" org-demote-subtree
   "C-M-," org-priority
@@ -88,9 +89,9 @@
   "C-M-k" org-metadown
   "C-M-i" org-metaup
   "C-M-S-l" org-store-link
-  "C-M-I" org-insert-link
   "C-M-v" org-paste-subtree
-  "C-M-s" org-sort-entries
+  "C-M-s" org-schedule
+  "C-M-d" org-deadline
   "C-M-X" org-cut-subtree
   "C-M-t" org-todo)
 
