@@ -161,7 +161,8 @@
 
 (defkeys undo-tree-mode
   "M-z" undo
-  "M-Z" redo)
+  "M-Z" redo
+  "C-M-z" undo-tree-visualize)
 
 (defkeys visual-regexp
   "C-M-s" vr/query-replace)
