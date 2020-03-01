@@ -123,6 +123,10 @@
   "M-/" paredit-split-sexp
   "C-/" paredit-splice-sexp)
 
+(defkeys prose
+  "M-q" fill-paragraph
+  "C-M-q" fill-region)
+
 (defkeys python-shell
   "<return>" newline
   "M-<return>" comint-send-input
