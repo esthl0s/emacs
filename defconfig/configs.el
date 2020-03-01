@@ -22,13 +22,19 @@
 		tab-stop-list '(0 3)
 		fill-column 80
 		backup-by-copying t
+		delete-old-versions t
+		kept-new-versions 6
+		kept-old-versions 2
+		version-control t
 		read-quoted-char-radix 10
 		mail-host-address "esthlos.com"
 		browse-url-browser-function 'browse-url-firefox
 		custom-theme-directory (expand-file-name "themes/"
 												 user-emacs-directory)
-		backup-directory-alist `(("." . ,(expand-file-name "saves"
-														   user-emacs-directory)))
+		backup-directory-alist `(("." . ,(expand-file-name "recovery/backup/" user-emacs-directory)))
+		auto-save-file-name-transforms `((".*"
+										  ,(expand-file-name "recovery/autosave/" user-emacs-directory)
+										  t))
 		lisp-mode-hooks '(common-lisp-mode-hook
 						  clojure-mode-hook
 						  cider-repl-mode-hook
