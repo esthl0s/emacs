@@ -378,7 +378,9 @@ _b_ ispell-buffer
   (:keys magit-mode-hook (hydra)))
 
 (defconfig (markdown-mode)
-  (:hooks markdown-mode-hook (setq indent-tabs-mode nil)))
+  (:keys markdown-mode-hook (prose))
+  (:hooks markdown-mode-hook (progn (fci-mode)
+									(setq indent-tabs-mode nil))))
 
 (defconfig (markdown-mode hydra)
   (defhydra hydra-markdown-mode (:foreign-keys run)
