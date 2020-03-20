@@ -883,11 +883,15 @@ _q_ quit
 (defconfig (slime)
   ;; note that this works instead of directly setting
   ;; inferior-lisp-program
-  (:hooks slime-repl-mode-hook (define-key slime-repl-mode-map
-								 (read-kbd-macro paredit-backward-delete-key) nil)
+  (:hooks slime-repl-mode-hook (slime|fix-repl-for-paredit)
 		  inferior-lisp-mode-hook (inferior-slime-mode t))
   (:keys lisp-mode-hook (general slime)
 		 slime-repl-mode-hook (slime-repl))
+  ;; note that this works instead of directly setting
+  ;; inferior-lisp-program
+  (defun slime|fix-repl-for-paredit ()
+	(define-key slime-repl-mode-map
+	  (read-kbd-macro paredit-backward-delete-key) nil))
   (setq slime-lisp-implementations '((sbcl ("/usr/bin/sbcl"))
 									 (ccl ("/usr/bin/ccl")))
 		common-lisp-hyperspec-root "file:///home/ate/.clhs/")
