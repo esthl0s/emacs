@@ -399,6 +399,7 @@ _B_ markdown-blockquote-region
 (defconfig (muti-term))
 
 (defconfig (org)
+  (:keys (org-mode-hook org-agenda-mode-hook) (general org))
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; custom commands
 
@@ -729,9 +730,6 @@ in the current buffer. Relies on `org-archive-headline-tags-to-archive'"
 				   (org-agenda-skip-function 'org-skip-if-actionable)
 				   (org-agenda-sorting-strategy
 					'(category-keep)))))))))
-
-(defconfig (org keys)
-  (:keys (org-mode-hook org-agenda-mode-hook) (general org)))
 
 (defconfig (org hydra)
   (defhydra hydra-org (:foreign-keys run)
