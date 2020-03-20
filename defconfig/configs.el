@@ -851,10 +851,11 @@ _q_ quit
   (:hooks python-mode-hook (setq tab-width 4
 								 python-indent 4
 								 python-indent-offset 4
-								 indent-tabs-mode nilelectric-pair-mode 1)
+								 indent-tabs-mode nil
+								 electric-pair-mode 1)
 		  inferior-python-mode-hook (setq electric-pair-mode 1))
   (:keys inferior-python-mode-hook (general python-shell))
-  (setq python-shell-interpreter "/usr/local/bin/python3"))
+  (setq python-shell-interpreter "/usr/bin/python3"))
 
 (defconfig (python rainbow-delimiters)
   (:hooks inferior-python-mode-hook (rainbow-delimiters-mode)))
