@@ -896,6 +896,11 @@ _q_ quit
 			slime-fancy-inspector))
   (require 'slime-autoloads))
 
+(defconfig (speedbar)
+  (:keys speedbar-mode-hook (speedbar))
+  (setq speedbar-use-images nil)
+  (speedbar-add-supported-extension ".clj"))
+
 (defconfig (smart-tabs-mode)
   (setq smart-tabs-mode t)
   (smart-tabs-add-language-support tex plain-tex-mode-hook

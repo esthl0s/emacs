@@ -157,6 +157,15 @@
   "M-p" sexpr-fix-parens
   "M-s" sexpr-edit-string-at-point)
 
+(defkeys speedbar
+  "M-s" speedbar-get-focus
+  "M-i"  speedbar-prev
+  "M-k" speedbar-next
+  "C-M-i" speedbar-restricted-prev
+  "C-M-k" speedbar-restricted-next
+  "M-h" speedbar-backward-list
+  "M-;" speedbar-forward-list)
+
 (defkeys swiper
   "C-s" swiper)
 
