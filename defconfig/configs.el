@@ -344,7 +344,7 @@ _p_ paredit
 "
 	("d" hydra-defconfig/body :exit t)
 	("e" hydra-english/body :exit t)
-	("g" magit-status :exit t)
+	("g" hydra-magit/body :exit t)
 	("h" hydra-hideshow/body :exit t)
 	("m" hydra-markdown-mode/body :exit t)
 	("o" hydra-org/body :exit t)
@@ -386,7 +386,18 @@ _b_ ispell-buffer
   (:keys magit-mode-hook (general)))
 
 (defconfig (magit hydra)
-  (:keys magit-mode-hook (hydra)))
+  (:keys magit-mode-hook (hydra))
+  (defhydra hydra-magit (:foreign-keys run)
+	"
+^Command^
+^^^^^^^----------------------
+_b_ magit-blame
+_g_ magit-status
+_q_ quit
+"
+	("b" magit-blame :exit t)
+	("g" magit-status :exit t)
+	("q" nil "quit" :exit t)))
 
 (defconfig (markdown-mode)
   (:keys markdown-mode-hook (prose))
