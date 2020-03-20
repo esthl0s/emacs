@@ -953,6 +953,9 @@ _q_ quit
 
 (defconfig (tramp gcloud))
 
+(defconfig (treemacs)
+  (:keys treemacs-mode-hook (general)))
+
 (defconfig (undo-tree)
   (:hooks general-modes-hooks (undo-tree-mode 1))
   (:keys undo-tree-mode-hook (undo-tree-mode)))

@@ -1,7 +1,6 @@
 (defkeys general
   "M-a" execute-extended-command
   "M-A" ansi-term
-  "M-s" (lambda () (interactive) (other-window -1))
   "M-S" other-window
   "M-d" delete-region
   "M-f" delete-char
@@ -22,7 +21,8 @@
   "M-x" kill-region
   "M-v" yank
   "M-c" kill-ring-save
-  "C-b" switch-to-buffer)
+  "C-b" switch-to-buffer
+  "C-t" treemacs-select-window)
 
 (defkeys eshell
   "<return>" eshell-send-input
