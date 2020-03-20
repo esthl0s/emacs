@@ -272,6 +272,21 @@ _q_ quit
   (when (memq window-system '(mac ns x))
 	(exec-path-from-shell-initialize)))
 
+(defconfig (face-remap)
+  (defhydra hydra-face-remap ()
+	"
+^Command^
+^^^^^^^----------------------
+_=_ text-scale-increase
+_-_ text-scale-decrease
+_0_ (text-scale-adjust 0)
+_q_ quit
+"
+	("=" (text-scale-increase 1))
+	("-" (text-scale-decrease 1))
+	("0" (text-scale-adjust 0))
+	("q" nil "quit" :exit t)))
+
 (defconfig (fill-column-indicator)
   (:hooks programming-modes-hooks (fci-mode))
   (setq fci-rule-use-dashes t)
@@ -336,6 +351,7 @@ _S_ hs-show-all   _s_ hs-show-block
 	"
 _d_ defconfig
 _e_ english
+_f_ face-remap
 _g_ magit
 _h_ hideshow
 _m_ markdown
@@ -344,6 +360,7 @@ _p_ paredit
 "
 	("d" hydra-defconfig/body :exit t)
 	("e" hydra-english/body :exit t)
+	("f" hydra-face-remap/body :exit t)
 	("g" hydra-magit/body :exit t)
 	("h" hydra-hideshow/body :exit t)
 	("m" hydra-markdown-mode/body :exit t)
