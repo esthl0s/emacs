@@ -12,6 +12,9 @@
   (defvar lisp-mode-hooks)
   (defvar programming-modes-hooks)
   (defvar general-modes-hooks)
+  (defun flash-mode-line ()
+	(invert-face 'mode-line)
+	(run-with-timer 0.1 nil #'invert-face 'mode-line))
   (setq default-directory "~/"
 		inhibit-splash-screen t
 		initial-scratch-message ""
@@ -21,6 +24,8 @@
 		sentence-end-double-space nil
 		tab-stop-list '(0 3)
 		fill-column 80
+		visible-bell nil
+		ring-bell-function 'flash-mode-line
 		backup-by-copying t
 		delete-old-versions t
 		kept-new-versions 6
