@@ -871,6 +871,9 @@ _q_ quit
 (defconfig (rainbow-delimiters)
   (:hooks programming-modes-hooks (rainbow-delimiters-mode)))
 
+(defconfig (scala-mode ensime)
+  (:keys scala-mode-hook (general ace-jump ace-window hydra file visual-regexp)))
+
 (defconfig (sexpr)
   (:hooks lisp-mode-hooks (sexpr-mode))
   (:keys lisp-mode-hooks (sexpr)))
