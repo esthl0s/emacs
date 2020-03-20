@@ -403,6 +403,9 @@ _B_ markdown-blockquote-region
 
 (defconfig (muti-term))
 
+(defconfig (nix-mode)
+  (:keys nix-mode-hook (general)))
+
 (defconfig (org)
   (:keys (org-mode-hook org-agenda-mode-hook) (general org))
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
